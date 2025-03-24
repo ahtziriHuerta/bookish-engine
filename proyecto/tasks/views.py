@@ -1,194 +1,187 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.models import User
-from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.db import IntegrityError
-from .forms import TaskForm, UsuarioForm
-from .models import Task, Rol, Usuario
-
 from django.contrib.auth.decorators import login_required
-
-@login_required
-def edit_user(request, user_id):
-    if not request.user.is_superuser:
-        return redirect('home')
-    
-    usuario = Usuario.objects.get(id=user_id)
-    
-    if request.method == 'POST':
-        # Aquí puedes manejar la edición de usuario, como cambiar su rol
-        nuevo_rol = request.POST['rol']
-        usuario.rol = Rol.objects.get(id=nuevo_rol)
-        usuario.save()
-        return redirect('admin_dashboard')
-    
-    return render(request, 'edit_user.html', {'usuario': usuario, 'roles': Rol.objects.all()})
+from django.contrib.auth.models import User
+from django.contrib import messages
+from .models import Task, Rol, Usuario, Credencial, DatosPersonales
+from .forms import TaskForm, UsuarioForm
+from .utils import superuser_required  # Decorador para restringir acceso a superusuarios
 
 
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            # Verificar si es superusuario
-            if user.is_superuser:
-                return redirect('admin_dashboard')  # Redirigir a la vista de admin
-            else:
-                return redirect('home')  # O alguna otra vista para usuarios normales
-        else:
-            return render(request, 'login.html', {'error': 'Credenciales inválidas'})
-    else:
-        return render(request, 'login.html')
-
-# Create your views here.
-
-@login_required
-def admin_dashboard(request):
-    if not request.user.is_superuser:
-        return redirect('home')  # Redirige si no es superusuario
-    # Aquí se pueden pasar los objetos para gestionar roles y usuarios
-    return render(request, 'admin_dashboard.html')
-
-@login_required
-def add_role(request):
-    if not request.user.is_superuser:
-        return redirect('home')
-    
-    if request.method == 'POST':
-        nombre_rol = request.POST['nombre_rol']
-        Rol.objects.create(nombre_rol=nombre_rol)
-        return redirect('admin_dashboard')
-    return render(request, 'admin_dashboard.html')
-
-
+### 🔹 VISTA DE INICIO
 def home(request):
     return render(request, 'home.html')
 
 
-def signup(request):
+### 🔹 AUTENTICACIÓN Y LOGIN
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
 
-    if request.method == 'GET':
-        return render(request, 'signup.html', {
-        'form': UserCreationForm
-        })
-    else:
-        if request.POST['password1'] == request.POST['password2']:
-            try:
-                user = User.objects.create_user(
-                    username=request.POST['username'],
-                    password=request.POST['password1'])
-                user.save()
-                login(request, user)
-                return redirect('tasks')
-            except IntegrityError:
-                return render(request, 'signup.html', {
-                    'form': UserCreationForm,
-                    'error': 'User already exists'
-                })
-        else:
-            return render(request, 'signup.html', {
-                'form': UserCreationForm,
-                'error': 'Passwords do not match'
-            })
-
-
-def tasks(request):
-    tasks = Task.objects.filter(user = request.user, datecompleted__isnull=True)
-    return render(request, 'tasks.html', {
-        'tasks': tasks
-    })
-
-def create_task(request):
-
-    if request.method == 'GET':
-        return render(request, 'create_task.html', {
-            'form': TaskForm()
-        })
-    else:
-        try:
-            form = TaskForm(request.POST)
-            new_task = form.save(commit=False)
-            new_task.user = request.user
-            new_task.save()
-            return redirect('tasks')
-        except ValueError:
-            return render(request, 'create_task.html', {
-                'form': TaskForm(),
-                'error': 'Bad data passed in. Try again.'
-            })
-
-
-def signout(request):
-    logout(request)
-    return redirect('home')
-
-def signin(request):
-    if request.method == 'GET':
-        return render(request, 'signin.html', {
-            'form': AuthenticationForm()
-        })
-    else:
-        user = authenticate(request, username=request.POST['username'], password=request.POST['password'])
-        if user is None:
-            return render(request, 'signin.html', {
-                'form': AuthenticationForm(),
-                'error': 'User does not exist'
-            })
-        else:
+        if user is not None:
             login(request, user)
-            return redirect('tasks')
-        
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib import messages
-from .models import Usuario, Rol, Credencial, DatosPersonales
-from .forms import UsuarioForm
+            return redirect("admin_dashboard" if user.is_superuser else "tasks")
+        else:
+            messages.error(request, "Usuario o contraseña incorrectos")
+            return render(request, "login.html")
 
-def create_user(request):
-    if not request.user.is_superuser:
-        return redirect('home')  # Redirigir si no es superusuario
+    return render(request, "login.html")
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("login")
+
+
+### 🔹 DASHBOARD PARA ADMINISTRADOR
+@superuser_required
+def admin_dashboard(request):
+    usuarios = Usuario.objects.all()
+    roles = Rol.objects.all()
+    return render(request, 'admin_dashboard.html', {'usuarios': usuarios, 'roles': roles})
+
+
+### 🔹 REGISTRO DE USUARIOS
+def signup(request):
+    if request.method == 'GET':
+        return render(request, 'signup.html', {'form': UsuarioForm()})
 
     if request.method == 'POST':
-        # Recoger datos del formulario de Usuario
+        username = request.POST['username']
+        password1 = request.POST['password1']
+        password2 = request.POST['password2']
+
+        if password1 != password2:
+            messages.error(request, "Las contraseñas no coinciden")
+            return render(request, 'signup.html', {'form': UsuarioForm()})
+
+        try:
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "El usuario ya existe")
+                return render(request, 'signup.html', {'form': UsuarioForm()})
+
+            user = User.objects.create_user(username=username, password=password1)
+            user.save()
+            login(request, user)
+            return redirect('tasks')
+
+        except Exception as e:
+            messages.error(request, f"Error al crear usuario: {str(e)}")
+            return render(request, 'signup.html', {'form': UsuarioForm()})
+
+
+### 🔹 LISTAR Y CREAR TAREAS
+@login_required
+def tasks(request):
+    tasks = Task.objects.filter(user=request.user, datecompleted__isnull=True)
+    return render(request, 'tasks.html', {'tasks': tasks})
+
+
+@login_required
+def create_task(request):
+    if request.method == 'GET':
+        return render(request, 'create_task.html', {'form': TaskForm()})
+
+    try:
+        form = TaskForm(request.POST)
+        new_task = form.save(commit=False)
+        new_task.user = request.user
+        new_task.save()
+        messages.success(request, "Tarea creada exitosamente")
+        return redirect('tasks')
+    except ValueError:
+        messages.error(request, "Datos inválidos")
+        return render(request, 'create_task.html', {'form': TaskForm()})
+
+
+### 🔹 CREAR USUARIOS DESDE EL PANEL DE ADMINISTRACIÓN
+@superuser_required
+def create_user(request):
+    if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        rol_id = request.POST['rol']  # Obtener el ID del rol asignado
-        
-        # Crear el usuario de Django
-        user = User.objects.create_user(username=username, password=password)
-        
-        # Crear el objeto Usuario y asociarlo con el rol
-        rol = Rol.objects.get(id=rol_id)
-        usuario = Usuario.objects.create(user=user, rol=rol)
-        
-        # Crear las credenciales del usuario
+        rol_id = request.POST['rol']
         correo = request.POST['correo']
-        contraseña = request.POST['password']  # La misma contraseña o puedes cambiarla
-        Credencial.objects.create(usuario=usuario, correo=correo, contraseña=contraseña)
-        
-        # Crear los datos personales
         nombre = request.POST['nombre']
         apellido = request.POST['apellido']
         nss = request.POST['nss']
         domicilio = request.POST['domicilio']
         telefono = request.POST['telefono']
-        
-        DatosPersonales.objects.create(
-            usuario=user,
-            nombre=nombre,
-            apellido=apellido,
-            nss=nss,
-            domicilio=domicilio,
-            telefono=telefono
-        )
 
-        messages.success(request, "Usuario creado correctamente")
-        return redirect('admin_dashboard')  # O donde necesites redirigir
+        try:
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "El usuario ya existe")
+                return redirect('create_user')
 
-    # Si el método es GET, mostrar el formulario vacío
-    roles = Rol.objects.all()  # Obtener todos los roles disponibles
+            user = User.objects.create_user(username=username, password=password)
+            rol = Rol.objects.get(id=rol_id)
+            usuario = Usuario.objects.create(user=user, rol=rol)
+
+            Credencial.objects.create(usuario=usuario, correo=correo, contraseña=password)
+            DatosPersonales.objects.create(
+                usuario=user, nombre=nombre, apellido=apellido, nss=nss, domicilio=domicilio, telefono=telefono
+            )
+
+            messages.success(request, "Usuario creado correctamente")
+            return redirect('admin_dashboard')
+
+        except Exception as e:
+            messages.error(request, f"Error al crear usuario: {str(e)}")
+            return redirect('create_user')
+
+    roles = Rol.objects.all()
     return render(request, 'create_user.html', {'roles': roles})
+
+
+
+### 🔹 EDITAR USUARIO
+def edit_user(request, user_id):
+    usuario = get_object_or_404(Usuario, id=user_id)
+
+    if request.method == 'POST':
+        usuario.user.username = request.POST['username']
+        usuario.user.email = request.POST['correo']
+        usuario.nombre = request.POST['nombre']
+        usuario.apellido = request.POST['apellido']
+        usuario.nss = request.POST['nss']
+        usuario.domicilio = request.POST['domicilio']
+        usuario.telefono = request.POST['telefono']
+
+        nuevo_rol_id = request.POST['rol']
+        usuario.rol = Rol.objects.get(id=nuevo_rol_id)
+
+        usuario.user.save()
+        usuario.save()
+
+        messages.success(request, "Usuario actualizado correctamente")
+        return redirect('admin_dashboard')
+
+    roles = Rol.objects.all()
+    return render(request, 'edit_user.html', {'usuario': usuario, 'roles': roles})
+
+
+### 🔹 AGREGAR ROLES DESDE EL PANEL DE ADMINISTRACIÓN
+@superuser_required
+def add_role(request):
+    if request.method == 'POST':
+        nombre_rol = request.POST['nombre_rol']
+        if Rol.objects.filter(nombre_rol=nombre_rol).exists():
+            messages.error(request, "El rol ya existe")
+        else:
+            Rol.objects.create(nombre_rol=nombre_rol)
+            messages.success(request, "Rol agregado correctamente")
+        return redirect('admin_dashboard')
+
+    return render(request, 'admin_dashboard.html')
+
+
+### 🔹 ELIMINAR USUARIO
+@superuser_required
+def delete_user(request, user_id):
+    usuario = get_object_or_404(Usuario, id=user_id)
+    usuario.user.delete()
+    usuario.delete()
+    messages.success(request, "Usuario eliminado correctamente")
+    return redirect('admin_dashboard')

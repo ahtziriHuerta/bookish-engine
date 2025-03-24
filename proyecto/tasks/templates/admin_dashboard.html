@@ -1,27 +1,71 @@
-<h2>Bienvenido al Dashboard de Administrador</h2>
+{% extends 'base.html' %}
+{% load static %}
 
-<h3>Gestionar Roles</h3>
-<form method="POST" action="add_role">
-    {% csrf_token %}
-    <input type="text" name="nombre_rol" placeholder="Nuevo Rol" required>
-    <button type="submit">Agregar Rol</button>
-</form>
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">📊 Dashboard de Administrador</h2>
 
-<h3>Gestionar Usuarios</h3>
-<table>
-    <tr>
-        <th>Nombre de Usuario</th>
-        <th>Rol</th>
-        <th>Acciones</th>
-    </tr>
-    {% for usuario in usuarios %}
-        <tr>
-            <td>{{ usuario.user.username }}</td>
-            <td>{{ usuario.rol.nombre_rol }}</td>
-            <td><a href="{% url 'edit_user' usuario.id %}">Editar</a></td>
-        </tr>
-    {% endfor %}
-</table>
+    <!-- Mensajes de éxito o error -->
+    {% if messages %}
+        <div class="alert alert-success text-center">
+            {% for message in messages %}
+                <p class="mb-0">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-<h3>Crear Nuevo Usuario</h3>
-<a href="create_user">Ir al formulario de creación</a>
+    <!-- Sección para gestionar roles -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">🛠 Gestionar Roles</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" class="d-flex">
+                {% csrf_token %}
+                <input type="text" name="nombre_rol" class="form-control me-2" placeholder="Nuevo Rol" required>
+                <button type="submit" class="btn btn-success">Agregar Rol</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sección para gestionar usuarios -->
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">👤 Gestionar Usuarios</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nombre de Usuario</th>
+                        <th>Rol</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for usuario in usuarios %}
+                        <tr>
+                            <td>{{ usuario.user.username }}</td>
+                            <td>{{ usuario.rol.nombre_rol }}</td>
+                            <td>
+                                <a href="{% url 'edit_user' usuario.id %}" class="btn btn-warning btn-sm">✏️ Editar</a>
+                                <a href="{% url 'delete_user' usuario.id %}" class="btn btn-danger btn-sm">🗑️ Eliminar</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Botón para crear usuario -->
+    <div class="text-center mt-4">
+        <a href="{% url 'create_user' %}" class="btn btn-success btn-lg">➕ Crear Nuevo Usuario</a>
+    </div>
+
+    <!-- Botón para cerrar sesión -->
+    <div class="text-center mt-3">
+        <a href="{% url 'logout' %}" class="btn btn-danger btn-lg">🚪 Cerrar Sesión</a>
+    </div>
+</div>
+{% endblock %}
