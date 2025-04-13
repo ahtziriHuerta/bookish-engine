@@ -21,6 +21,15 @@ class Rol(models.Model):
 
     def __str__(self):
         return self.nombre_rol
+    
+def crear_usuario_con_rol(sender, instance, created, **kwargs):
+    if created:
+        from .models import Rol, Usuario
+        try:
+            rol_empleado = Rol.objects.get(nombre_rol="Empleado")
+        except Rol.DoesNotExist:
+            rol_empleado = Rol.objects.create(nombre_rol="Empleado")
+        Usuario.objects.create(user=instance, rol=rol_empleado)
 
 class Usuario(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # Usa la tabla de Django
@@ -44,14 +53,17 @@ class Proveedor(models.Model):
 
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
-    descripcion = models.TextField(blank=True, null=True)
+    descripcion = models.TextField(default='Sin descripción')
     precio = models.DecimalField(max_digits=10, decimal_places=2)
-    stock = models.IntegerField()
+    stock = models.IntegerField(default=0)
     codigo_barras = models.CharField(max_length=50, unique=True)
-    proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True)
+    proveedor = models.ForeignKey('Proveedor', on_delete=models.CASCADE, null=True, blank=True)
+
+    imagen = models.ImageField(upload_to='productos/', blank=True, null=True)  # ✅ Agrega esta línea
 
     def __str__(self):
         return self.nombre
+
 
 class Venta(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True)
@@ -81,3 +93,5 @@ class DatosPersonales(models.Model):
 
     def __str__(self):
         return f'{self.nombre} {self.apellido} - {self.usuario.username}'
+    
+    

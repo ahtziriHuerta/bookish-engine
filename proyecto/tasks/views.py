@@ -6,6 +6,9 @@ from django.contrib import messages
 from .models import Task, Rol, Usuario, Credencial, DatosPersonales
 from .forms import TaskForm, UsuarioForm
 from .utils import superuser_required  # Decorador para restringir acceso a superusuarios
+from .decorators import roles_permitidos
+from .forms import ProductoForm
+from .models import Producto
 
 
 ### 🔹 VISTA DE INICIO
@@ -42,6 +45,11 @@ def admin_dashboard(request):
     roles = Rol.objects.all()
     return render(request, 'admin_dashboard.html', {'usuarios': usuarios, 'roles': roles})
 
+from .decorators import roles_permitidos  # Asegúrate de tener esta línea
+
+@roles_permitidos(["Cajero"])
+def cajero_dashboard(request):
+    return render(request, 'cajero_dashboard.html')
 
 ### 🔹 REGISTRO DE USUARIOS
 def signup(request):
@@ -70,6 +78,11 @@ def signup(request):
         except Exception as e:
             messages.error(request, f"Error al crear usuario: {str(e)}")
             return render(request, 'signup.html', {'form': UsuarioForm()})
+        
+ ### 🔹 no autoriza el acceso       
+def no_autorizado(request):
+    return render(request, 'no_autorizado.html')
+
 
 
 ### 🔹 LISTAR Y CREAR TAREAS
@@ -185,3 +198,21 @@ def delete_user(request, user_id):
     usuario.delete()
     messages.success(request, "Usuario eliminado correctamente")
     return redirect('admin_dashboard')
+
+
+
+def cajero_dashboard(request):
+    productos = Producto.objects.all()
+    return render(request, 'cajero_dashboard.html', {'productos': productos})
+
+
+def crear_producto(request):
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('cajero_dashboard')
+
+    else:
+        form = ProductoForm()
+    return render(request, 'create_product.html', {'form': form})

@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Punto de Venta</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+  <div class="container">
+    <div class="products-panel">
+      <h2>Favorites</h2>
+      <div class="grid" id="products">
+        {% for producto in productos %}
+        <div class="product" data-name="{{ producto.nombre }}" data-price="{{ producto.precio }}">
+          {% if producto.imagen %}
+            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+          {% else %}
+            <img src="{% static 'img/default.png' %}" alt="default">
+          {% endif %}
+          <p>{{ producto.nombre }}</p>
+          <span>${{ producto.precio }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="ticket-panel">
+      <h2>Ticket</h2>
+      <ul id="ticket-list"></ul>
+      <div class="summary">
+        <p>Discounts: <span id="discount">$0.00</span></p>
+        <p>Tax: <span id="tax">$0.00</span></p>
+        <p class="total">Total: <span id="total">$0.00</span></p>
+        <button id="save">SAVE</button>
+        <button id="charge">CHARGE</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
