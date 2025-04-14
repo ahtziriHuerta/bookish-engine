@@ -1,64 +1,190 @@
-/* Estilos base */
+/* Reset base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Fondo general */
 body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(to right, #667eea, #764ba2);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #F5F5DC, #D2B48C);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Contenedor principal que envuelve logo + login */
+.main-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  width: 100%;
+  max-width: 1200px;
+  flex-wrap: wrap;
+}
+
+/* Logo decorativo */
+.logo-left {
+  max-width: 400px;
+  width: 50%;
+  height: auto;
 }
 
 /* Contenedor del login */
 .login-container {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    width: 100%;
-    max-width: 400px;
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+  z-index: 1;
 }
 
 /* Título */
 h2 {
-    margin-bottom: 20px;
-    color: #333;
+  margin-bottom: 20px;
+  color: #333;
 }
 
-/* Estilos de los inputs */
+/* Inputs */
 .input-group {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .input-group input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-    text-align: center;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  text-align: center;
 }
 
-/* Botón de login */
+/* Checkbox mostrar contraseña */
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.checkbox-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #d2b48c;
+}
+
+/* Botón */
 button {
-    background: #667eea;
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 5px;
-    font-size: 18px;
-    cursor: pointer;
-    width: 100%;
+  background: #D2B48C;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+  width: 100%;
+  font-weight: bold;
+  transition: all 0.3s ease;
 }
 
 button:hover {
-    background: #5a67d8;
+  background: #c39b6c;
+  transform: scale(1.01);
 }
 
-/* Mensaje de error */
+/* Error */
 .error {
-    color: red;
-    font-weight: bold;
-    margin-bottom: 10px;
+  color: red;
+  font-weight: bold;
+  margin-bottom: 10px;
 }
+
+/* Cargando */
+#loading {
+  margin-top: 10px;
+  color: #555;
+  font-size: 14px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive para móviles */
+@media (max-width: 768px) {
+  .main-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .logo-left {
+    width: 60%;
+    max-width: 220px;
+  }
+
+  .login-container {
+    width: 100%;
+    max-width: 340px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+
+  .input-group input,
+  button {
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  .checkbox-group {
+    font-size: 13px;
+  }
+}
+
+
+.numpad-panel {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .numpad {
+    display: grid;
+    grid-template-columns: repeat(3, 60px);
+    gap: 10px;
+    margin-top: 10px;
+  }
+  
+  .numpad button {
+    padding: 15px;
+    font-size: 20px;
+    background-color: #d2b48c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s ease;
+  }
+  
+  .numpad button:hover {
+    background-color: #c39b6c;
+  }
+  
