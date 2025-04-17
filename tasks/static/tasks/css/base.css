@@ -1,0 +1,33 @@
+/* Estilo general del cuerpo */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Estilo del contenedor principal */
+.container {
+    max-width: 900px;
+    margin: auto;
+}
+
+/* Estilo para las tarjetas */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para los mensajes de alerta */
+.alert {
+    font-weight: bold;
+}
+
+/* Estilo para la tabla */
+.table {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Botones personalizados */
+.btn {
+    font-size: 16px;
+}

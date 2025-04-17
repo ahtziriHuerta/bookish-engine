@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Iniciar Sesión</title>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="{% static 'tasks/css/login.css' %}">
+  <!-- Script -->
+  <script src="{% static 'tasks/js/login.js' %}" defer></script>
+</head>
+
+<body>
+  <div class="main-container">
+    
+    <!-- LOGO -->
+    <img src="{% static 'tasks/img/logo.png' %}" alt="Logo" class="logo-left" id="logo-img">
+
+    <!-- Panel numérico -->
+    <div class="numpad-panel" id="numpad-panel" style="display: none;">
+      <div class="numpad">
+        <button onclick="addDigit('1')">1</button>
+        <button onclick="addDigit('2')">2</button>
+        <button onclick="addDigit('3')">3</button>
+        <button onclick="addDigit('4')">4</button>
+        <button onclick="addDigit('5')">5</button>
+        <button onclick="addDigit('6')">6</button>
+        <button onclick="addDigit('7')">7</button>
+        <button onclick="addDigit('8')">8</button>
+        <button onclick="addDigit('9')">9</button>
+        <button onclick="clearPassword()">C</button>
+        <button onclick="addDigit('0')">0</button>
+        <button onclick="backspace()">←</button>
+      </div>
+    </div>
+
+    <!-- Login -->
+    <div class="login-container">
+      <h2>Iniciar Sesión</h2>
+
+      {% if error %}
+        <p class="error">{{ error }}</p>
+      {% endif %}
+
+      <form method="POST">
+        {% csrf_token %}
+
+        <div class="input-group">
+          <input type="text" name="username" placeholder="Usuario" required />
+        </div>
+
+        <div class="input-group">
+          <input type="password" name="password" id="password" placeholder="Contraseña" onclick="toggleNumpad()" onfocus="this.blur()" required />
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" id="show-password" onclick="togglePassword()" />
+          <label for="show-password">Mostrar contraseña</label>
+        </div>
+
+        <button type="submit">Ingresar</button>
+
+        <div id="loading" style="display: none">Procesando...</div>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

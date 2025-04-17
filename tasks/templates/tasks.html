@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h1>Tasks</h1>
+
+{% for task in tasks %}
+
+    {% if task.important %}
+    <strong>{{ task.title }}</strong>
+    {% else %}
+    {{ task.title }}
+    {% endif %}
+    <p>{{ task.description }}</p>
+    <p>{{ task.status }}</p>
+    <p>{{ task.due_date }}</p>
+    <p>{{ task.created_at }}</p>
+    <p>{{ task.updated_at }}</p>
+    <a href="/tasks/edit/{{ task.id }}">Edit</a>
+    <a href="/tasks/delete/{{ task.id }}">Delete</a>
+{% endfor %}    
+
+{% endblock %}
+
