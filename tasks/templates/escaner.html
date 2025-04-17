@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Escáner de Producto</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <style>
+        #scanner-container {
+            width: 640px;
+            height: 480px;
+            margin: 20px auto;
+            border: 2px solid #000;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h2>Escanea el código de barras</h2>
+    <div id="scanner-container"></div>
+    <p id="resultado"></p>
+
+    <script>
+        Quagga.init({
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: document.querySelector('#scanner-container'),
+                constraints: {
+                    width: 640,
+                    height: 480,
+                    facingMode: "environment"
+                }
+            },
+            decoder: {
+                readers: ["ean_reader", "ean_13_reader", "upc_reader"]
+            },
+        }, function (err) {
+            if (err) {
+                console.error("🚫 Error al iniciar Quagga:", err);
+                alert("No se pudo acceder a la cámara: " + err.name);
+                return;
+            }
+            console.log("✅ Quagga inicializado correctamente");
+            Quagga.start();
+        });
+
+        Quagga.onDetected(function (data) {
+            let codigo = data.codeResult.code;
+            document.getElementById("resultado").innerText = "Código detectado: " + codigo;
+
+            // Evita múltiples lecturas repetidas
+            Quagga.offDetected();
+            Quagga.stop();
+
+            // Buscar el producto en Django
+            fetch(`/buscar_producto/${codigo}/`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        alert("Producto no encontrado");
+                    } else {
+                        alert(`Producto: ${data.nombre}\nPrecio: ${data.precio}`);
+                        // Aquí podrías insertar los datos en un formulario o tabla si deseas
+                    }
+                })
+                .catch(error => {
+                    alert("Error al buscar producto: " + error);
+                });
+        });
+    </script>
+</body>
+</html>

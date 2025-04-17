@@ -1,0 +1,91 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Punto de Venta - Cajero</title>
+  <link rel="stylesheet" href="{% static 'tasks/css/escaner.css' %}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+  <script src="{% static 'tasks/js/escaner.js' %}" defer></script>
+</head>
+<body>
+  <div class="container">
+    <div class="products-panel">
+      <h2>Favorites</h2>
+      <div class="grid" id="products">
+        {% for producto in productos %}
+        <div class="product {% if producto.stock == 0 %}sin-stock{% endif %}"
+             data-name="{{ producto.nombre }}"
+             data-price="{{ producto.precio }}"
+             data-stock="{{ producto.stock }}"
+             data-id="{{ producto.id }}">
+          {% if producto.imagen %}
+            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+          {% else %}
+            <img src="{% static 'img/default.png' %}" alt="default">
+          {% endif %}
+          <p>{{ producto.nombre }}</p>
+          <span>${{ producto.precio }}</span>
+          <p class="stock-info {% if producto.stock == 0 %}agotado{% endif %}">
+            {% if producto.stock == 0 %}Agotado{% else %}Disponibles: {{ producto.stock }}{% endif %}
+          </p>
+        </div>
+        {% endfor %}
+      </div>
+      <input type="text" id="codigoManual" placeholder="Código de barras">
+      <button onclick="buscarProductoManual()" class="btn">🔍 Buscar producto</button>
+      <button onclick="abrirEscaner()" class="btn">📷 Escanear código</button>
+    </div>
+
+    <div class="ticket-panel">
+      <h2>Ticket</h2>
+      <ul id="ticket-list"></ul>
+      <div class="summary">
+        <p>Descuento: <span id="discount">$0.00</span></p>
+        <p>Iva: <span id="tax">$0.00</span></p>
+        <p class="total">Total: <span id="total">$0.00</span></p>
+        <div style="margin-top: 20px;">
+          <label>Efectivo recibido:</label><br>
+          <input type="text" id="efectivo" placeholder="$0.00" inputmode="decimal"
+                 pattern="[0-9]*" oninput="calcularCambio()" style="padding: 8px; width: 150px;">
+          <p>Cambio: <span id="cambio">$0.00</span></p>
+          <div style="margin-top: 15px;">
+            <label for="metodo-pago">Método de pago:</label><br>
+            <select id="metodo-pago" style="padding: 6px; width: 150px;">
+              <option value="efectivo">Efectivo</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="transferencia">Transferencia</option>
+              <option value="vales">Vales</option>
+            </select>
+          </div>
+          
+        </div>
+        <button onclick="vistaPreviaTicket()" class="btn">🧾 Terminar</button>
+        </div>
+      </div>
+    </div>
+
+  <div id="modalEscaner">
+    <div id="modalContent">
+      <h3>Escanea un producto</h3>
+      <div id="scanner-container"></div>
+      <button onclick="cerrarEscaner()" class="btn">Cerrar</button>
+    </div>
+  </div>
+
+  <div id="teclado-numerico" class="teclado">
+    <div class="tecla" onclick="insertarNumero('1')">1</div>
+    <div class="tecla" onclick="insertarNumero('2')">2</div>
+    <div class="tecla" onclick="insertarNumero('3')">3</div>
+    <div class="tecla" onclick="insertarNumero('4')">4</div>
+    <div class="tecla" onclick="insertarNumero('5')">5</div>
+    <div class="tecla" onclick="insertarNumero('6')">6</div>
+    <div class="tecla" onclick="insertarNumero('7')">7</div>
+    <div class="tecla" onclick="insertarNumero('8')">8</div>
+    <div class="tecla" onclick="insertarNumero('9')">9</div>
+    <div class="tecla" onclick="insertarNumero('0')">0</div>
+    <div class="tecla" onclick="insertarNumero('.')">.</div>
+    <div class="tecla" onclick="borrarTodo()">C</div>
+  </div>
+</body>
+</html>

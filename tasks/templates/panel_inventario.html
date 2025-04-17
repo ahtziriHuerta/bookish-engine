@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Panel de Inventario{% endblock %}
+{% block content %}
+<div class="container">
+  <h1 class="mb-4">Panel de Inventario</h1>
+
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card border-success">
+        <div class="card-body">
+          <h5 class="card-title">Total de productos dados de alta (entradas)</h5>
+          <p class="card-text display-6 text-success">{{ total_entradas }} unidades</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-danger">
+        <div class="card-body">
+          <h5 class="card-title">Total de productos dados de baja (egresos)</h5>
+          <p class="card-text display-6 text-danger">{{ total_egresos }} unidades</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header">Inventario actual por producto</div>
+    <div class="card-body p-0">
+      <table class="table table-striped mb-0">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Stock actual</th>
+            <th>Entradas este mes</th>
+            <th>Egresos este mes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in inventario %}
+          <tr>
+            <td>{{ item.producto.nombre }}</td>
+            <td>{{ item.stock_actual }}</td>
+            <td class="text-success">+{{ item.total_entradas }}</td>
+            <td class="text-danger">-{{ item.total_egresos }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4">No hay productos registrados.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
