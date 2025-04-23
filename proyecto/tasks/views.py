@@ -216,3 +216,18 @@ def crear_producto(request):
     else:
         form = ProductoForm()
     return render(request, 'create_product.html', {'form': form})
+
+
+from django.shortcuts import render, redirect
+from .forms import ProveedorForm
+
+def crear_proveedor(request):
+    if request.method == 'POST':
+        form = ProveedorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('admin_dashboard.html')  # Cambia por el nombre de tu vista de lista si tienes
+    else:
+        form = ProveedorForm()
+    
+    return render(request, 'crear_proveedor.html', {'form': form})

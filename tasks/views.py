@@ -390,3 +390,51 @@ def dashboard_inventario(request):
         'total_egresos': total_egresos,
         'mes': hoy.strftime('%B').capitalize()
     })
+
+
+
+from django.shortcuts import render, redirect
+from .forms import ProveedorForm
+
+def crear_proveedor(request):
+    if request.method == 'POST':
+        form = ProveedorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_proveedores')  # Cambia por el nombre de tu vista de lista si tienes
+    else:
+        form = ProveedorForm()
+    
+    return render(request, 'crear_proveedor.html', {'form': form})
+
+
+# views.py
+from .models import Proveedor
+
+def lista_proveedores(request):
+    proveedores = Proveedor.objects.all()
+    return render(request, 'lista_proveedores.html', {'proveedores': proveedores})
+
+# views.py
+from django.shortcuts import get_object_or_404
+
+def editar_proveedor(request, proveedor_id):
+    proveedor = get_object_or_404(Proveedor, id=proveedor_id)
+    if request.method == 'POST':
+        form = ProveedorForm(request.POST, instance=proveedor)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_proveedores')
+    else:
+        form = ProveedorForm(instance=proveedor)
+    
+    return render(request, 'editar_proveedor.html', {'form': form})
+
+
+def eliminar_proveedor(request, proveedor_id):
+    proveedor = get_object_or_404(Proveedor, id=proveedor_id)
+    if request.method == 'POST':
+        proveedor.delete()
+        return redirect('lista_proveedores')
+    return render(request, 'eliminar_proveedor.html', {'proveedor': proveedor})
+

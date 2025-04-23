@@ -1,0 +1,15 @@
+<!-- templates/crear_proveedor.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nuevo Proveedor</title>
+</head>
+<body>
+    <h1>Dar de alta proveedor</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar</button>
+    </form>
+</body>
+</html>

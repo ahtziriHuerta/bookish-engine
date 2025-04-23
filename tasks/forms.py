@@ -3,6 +3,9 @@ from .models import Task
 from .models import Rol
 from django import forms
 from .models import Producto
+from .models import Proveedor
+
+
 class TaskForm(ModelForm):
     class Meta:
         model = Task
@@ -24,3 +27,10 @@ class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
         fields = ['nombre', 'descripcion', 'precio', 'stock', 'codigo_barras', 'proveedor', 'imagen']
+
+
+
+class ProveedorForm(forms.ModelForm):
+    class Meta:
+        model = Proveedor
+        fields = ['nombre', 'telefono', 'direccion']

@@ -1,0 +1,14 @@
+<!-- templates/lista_proveedores.html -->
+<h1>Lista de Proveedores</h1>
+<ul>
+    {% for proveedor in proveedores %}
+        <li>
+            {{ proveedor.nombre }} - {{ proveedor.telefono }} - {{ proveedor.direccion }}
+            |
+            <a href="{% url 'editar_proveedor' proveedor.id %}">Editar</a>
+            |
+            <a href="{% url 'eliminar_proveedor' proveedor.id %}">Eliminar</a>
+        </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'crear_proveedor' %}">Agregar nuevo proveedor</a>

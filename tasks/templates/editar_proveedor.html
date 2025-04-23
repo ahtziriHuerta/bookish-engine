@@ -1,0 +1,16 @@
+<!-- templates/editar_proveedor.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editar Proveedor</title>
+</head>
+<body>
+    <h1>Editar Proveedor</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Guardar cambios</button>
+    </form>
+    <a href="{% url 'lista_proveedores' %}">Cancelar</a>
+</body>
+</html>
