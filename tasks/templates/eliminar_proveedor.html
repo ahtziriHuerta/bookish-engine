@@ -1,17 +1,16 @@
-<!-- templates/eliminar_proveedor.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Eliminar Proveedor</title>
-</head>
-<body>
-    <h1>Eliminar Proveedor</h1>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="card shadow p-4 text-center mx-auto" style="max-width: 500px;">
+    <h2 class="mb-4 text-danger">⚠️ Eliminar Proveedor</h2>
     <p>¿Estás seguro que deseas eliminar al proveedor <strong>{{ proveedor.nombre }}</strong>?</p>
-    
-    <form method="post">
+
+    <form method="post" class="mt-4">
         {% csrf_token %}
-        <button type="submit">Sí, eliminar</button>
-        <a href="{% url 'lista_proveedores' %}">Cancelar</a>
+        <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+        <a href="{% url 'lista_proveedores' %}" class="btn btn-secondary ms-2">Cancelar</a>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}

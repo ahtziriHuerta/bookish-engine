@@ -99,7 +99,6 @@ class Venta(models.Model):
 
 
 
-
 class DetalleVenta(models.Model):
     venta = models.ForeignKey(Venta, on_delete=models.CASCADE)
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)

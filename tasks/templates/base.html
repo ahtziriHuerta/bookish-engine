@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Tienda Corozo{% endblock %}</title>
 
-    <!-- Bootstrap -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Estilos personalizados -->
@@ -14,80 +14,60 @@
 </head>
 <body>
 
-    <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">Tienda Corozo</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="{% url 'home' %}">Tienda Corozo</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        {% if user_rol == "Administrador" %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'admin_dashboard' %}">🏠 Panel Admin</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'add_role' %}">➕ Agregar Rol</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'create_user' %}">👤 Crear Usuario</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'create_product' %}">🛒 Crear Producto</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'crear_proveedor' %}">🚚 Nuevo Proveedor</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'lista_proveedores' %}">📋 Lista Proveedores</a></li>
 
-                    <!-- Siempre visible -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">Inicio</a>
-                    </li>
+ 
 
-                    {% if user.is_authenticated %}
+        {% elif user_rol == "Gerente" %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'gerente_dashboard' %}">📋 Panel Gerente</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard_ventas' %}">📊 Ventas</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard_inventario' %}">📦 Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'create_product' %}">🛒 Crear Producto</a></li>
 
-                        {% if user_rol == "Administrador" %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'admin_dashboard' %}">Panel Admin</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'cajero_dashboard' %}">Panel Cajero</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'cajero_dashboard' %}">Panel Ventas</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'create_product' %}">Agregar Producto</a>
-                            </li>
-
-                            
-
-                        {% elif user_rol == "Cajero" or user_rol == "Gerente" %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'cajero_dashboard' %}">Panel Cajero</a>
-                            </li>
+        {% elif user_rol == "Ventas" %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard_ventas' %}">📊 Ventas</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'dashboard_inventario' %}">📦 Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'lista_proveedores' %}">📋 Lista Proveedores</a></li>
 
 
+        {% elif user_rol == "Cajero" %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'cajero_dashboard' %}">🧾 Caja</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'escanear_producto' %}">📷 Escanear</a></li>
+        {% endif %}
 
-                        {% elif user_rol == "Ventas" %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="#">Panel Ventas</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'create_product' %}">Agregar Producto</a>
-                            </li>
-                        
-                        {% endif %}
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Cerrar sesión</a>
-                        </li>
-
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- CONTENIDO -->
-    <div class="container mt-4">
-        {% block content %}
-        <!-- Aquí se carga el contenido de cada página -->
-        {% endblock %}
+        {% if request.user.is_authenticated %}
+          <li class="nav-item"><a class="nav-link text-danger" href="{% url 'logout' %}">🚪 Cerrar sesión</a></li>
+        {% endif %}
+      </ul>
     </div>
+  </div>
+</nav>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- CONTENIDO -->
+<div class="container mt-4">
+    {% block content %}
+    <!-- Aquí se carga el contenido específico de cada página -->
+    {% endblock %}
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

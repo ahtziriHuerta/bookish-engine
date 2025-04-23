@@ -1,0 +1,9 @@
+<h2>Historial de Ventas</h2>
+<ul>
+  {% for venta in ventas %}
+    <li>
+      Folio: {{ venta.folio }} | {{ venta.fecha }} | Total: ${{ venta.total }}
+      <a href="{% url 'ver_ticket' venta.folio %}">🧾 Ver ticket</a>
+    </li>
+  {% endfor %}
+</ul>

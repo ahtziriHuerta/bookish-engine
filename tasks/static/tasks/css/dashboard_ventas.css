@@ -1,0 +1,12 @@
+.grafico-container {
+  position: relative;
+  width: 80%;
+  max-width: 400px; /* puedes ajustarlo a tu gusto */
+  height: auto;
+  margin: 0 auto;
+}
+
+#graficoMetodoPago {
+  width: 100% !important;
+  height: auto !important;
+}

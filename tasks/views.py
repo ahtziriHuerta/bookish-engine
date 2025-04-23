@@ -19,8 +19,8 @@ from .reportes import generar_excel_ventas, generar_pdf_ventas
 from django.db.models import Sum
 from datetime import datetime
 from .models import Producto, IngresoProducto, EgresoProducto
-
-
+from django.contrib import messages
+from datetime import datetime, date
 
 
 
@@ -30,6 +30,8 @@ def home(request):
 
 
 ### 🔹 AUTENTICACIÓN Y LOGIN
+
+
 def login_view(request):
     if request.method == "POST":
         username = request.POST["username"]
@@ -38,17 +40,30 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            return redirect("admin_dashboard" if user.is_superuser else "tasks")
+
+            usuario = Usuario.objects.get(user=user)
+            rol = usuario.rol.nombre_rol
+
+
+            if rol == "Administrador":
+                return redirect("admin_dashboard")
+            elif rol == "Gerente":
+                return redirect("gerente_dashboard")
+            elif rol == "Ventas":
+                return redirect("dashboard_ventas")
+            elif rol == "Cajero":
+                return redirect("cajero_dashboard")
+            else:
+                return redirect("no_autorizado")
         else:
             messages.error(request, "Usuario o contraseña incorrectos")
-            return render(request, "login.html")
 
     return render(request, "login.html")
 
-
 def logout_view(request):
     logout(request)
-    return redirect("login")
+    return redirect('login')
+
 
 
 ### 🔹 DASHBOARD PARA ADMINISTRADOR
@@ -60,10 +75,44 @@ def admin_dashboard(request):
 
 from .decorators import roles_permitidos  # Asegúrate de tener esta línea
 
-@roles_permitidos(["Cajero"])
+
+@roles_permitidos(["Cajero", 'Administrador', 'Gerente'])
 def cajero_dashboard(request):
-    productos = Producto.objects.all()
+    productos = Producto.objects.all()  # 👈 debe ser así de simple
     return render(request, 'cajero_dashboard.html', {'productos': productos})
+
+
+@roles_permitidos(['Gerente'])
+def gerente_dashboard(request):
+    hoy = datetime.now()
+
+    # Ventas del mes
+    ventas = Venta.objects.filter(fecha__month=hoy.month, fecha__year=hoy.year)
+    total_ventas = ventas.count()
+    total_ingresos = ventas.aggregate(suma=Sum('total'))['suma'] or 0
+
+    # Inventario
+    productos = Producto.objects.all()
+    stock_bajo = productos.filter(stock__lte=5)  # Cambia el umbral según necesites
+
+    entradas_totales = IngresoProducto.objects.filter(
+        fecha__month=hoy.month, fecha__year=hoy.year
+    ).aggregate(total=Sum('cantidad'))['total'] or 0
+
+    egresos_totales = EgresoProducto.objects.filter(
+        fecha__month=hoy.month, fecha__year=hoy.year
+    ).aggregate(total=Sum('cantidad'))['total'] or 0
+
+    return render(request, 'dashboard_gerente.html', {
+        'total_ventas': total_ventas,
+        'total_ingresos': total_ingresos,
+        'stock_bajo': stock_bajo,
+        'total_entradas': entradas_totales,
+        'total_egresos': egresos_totales,
+        'mes': hoy.strftime('%B').capitalize()
+    })
+
+
 
 
 ### 🔹 REGISTRO DE USUARIOS
@@ -126,6 +175,7 @@ def create_task(request):
 
 ### 🔹 CREAR USUARIOS DESDE EL PANEL DE ADMINISTRACIÓN
 @superuser_required
+@roles_permitidos(['Administrador','Gerente'])
 def create_user(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -165,6 +215,7 @@ def create_user(request):
 
 
 ### 🔹 EDITAR USUARIO
+@roles_permitidos(['Administrador','Gerente'])
 def edit_user(request, user_id):
     usuario = get_object_or_404(Usuario, id=user_id)
 
@@ -206,6 +257,7 @@ def add_role(request):
 
 
 ### 🔹 ELIMINAR USUARIO
+@roles_permitidos(['Administrador','Gerente'])
 @superuser_required
 def delete_user(request, user_id):
     usuario = get_object_or_404(Usuario, id=user_id)
@@ -216,7 +268,7 @@ def delete_user(request, user_id):
 
 
 
-@roles_permitidos(['Administrador','Ventas'])
+@roles_permitidos(['Administrador','Ventas', 'Gerente'])
 def crear_producto(request):
     if request.method == 'POST':
         form = ProductoForm(request.POST, request.FILES)
@@ -227,8 +279,9 @@ def crear_producto(request):
         form = ProductoForm()
     return render(request, 'create_product.html', {'form': form})  # ✅ esto está bien
 
+
 @login_required
-@roles_permitidos(['Cajero'])
+@roles_permitidos(['Cajero', 'Ventas', 'Administrador', 'Gerente'])
 def buscar_producto(request, codigo):
     try:
         producto = Producto.objects.get(codigo_barras=codigo)
@@ -274,86 +327,43 @@ def actualizar_stock(request, producto_id):
     return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
 
-@csrf_exempt
-@login_required
-def registrar_venta(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            total = data.get('total')
-            items = data.get('items', [])
-            metodo_pago = data.get('metodo_pago')
-
-            if not request.user.is_authenticated:
-                return JsonResponse({'success': False, 'error': 'Usuario no autenticado'}, status=403)
-
-            if not items:
-                return JsonResponse({'success': False, 'error': 'No hay productos'}, status=400)
-
-            # Crear venta y generar folio
-            venta = Venta(
-                total=total,
-                usuario=request.user,
-                metodo_pago=metodo_pago
-            )
-            venta.save()
-
-            # Crear detalles de venta
-            for item in items:
-                producto = Producto.objects.get(id=item['id'])
-                DetalleVenta.objects.create(
-                    venta=venta,
-                    producto=producto,
-                    cantidad=item['qty'],
-                    precio_unitario=item['price']
-                )
-
-            # Respuesta JSON con toda la información
-            return JsonResponse({
-                'success': True,
-                'folio': venta.folio,
-                'fecha': venta.fecha.strftime('%d/%m/%Y %H:%M'),
-                'metodo_pago': venta.metodo_pago
-            })
-
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)}, status=500)
-
-    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
 
 
-
-
-@roles_permitidos(['Administrador', 'Ventas'])
+@roles_permitidos(['Administrador', 'Ventas', 'Gerente'])
 def dashboard_ventas(request):
-    from datetime import datetime
-
-    # Filtrar por mes actual
+    mes_str = request.GET.get('mes')
     hoy = datetime.now()
-    ventas = Venta.objects.filter(fecha__month=hoy.month, fecha__year=hoy.year)
 
+    if mes_str:
+        año, mes = map(int, mes_str.split('-'))
+    else:
+        año, mes = hoy.year, hoy.month
+
+    ventas = Venta.objects.filter(fecha__month=mes, fecha__year=año).annotate(
+        tiene_ticket=Count('detalleventa')
+    )
     total_ingresos = ventas.aggregate(total=Sum('total'))['total'] or 0
-    total_por_metodo = ventas.values('metodo_pago').annotate(total=Sum('total'))
+    total_por_metodo = list(ventas.values('metodo_pago').annotate(total=Sum('total')))
 
     return render(request, 'dashboard_ventas.html', {
         'ventas': ventas,
         'total_ingresos': total_ingresos,
         'total_por_metodo': total_por_metodo,
-        'mes': hoy.strftime('%B').capitalize()
+        'mes': date(año, mes, 1).strftime('%B').capitalize(),
+        'mes_valor': f'{año}-{mes:02d}'
     })
-    
 
 
-@roles_permitidos(['Administrador', 'Ventas'])
+@roles_permitidos(['Administrador', 'Ventas','Gerente'])
 def exportar_ventas_excel(request):
     return generar_excel_ventas()
 
-@roles_permitidos(['Administrador', 'Ventas'])
+@roles_permitidos(['Administrador', 'Ventas' , 'Gerente'])
 def exportar_ventas_pdf(request):
     return generar_pdf_ventas()
 
 
-@roles_permitidos(['Administrador', 'Gerente'])
+@roles_permitidos(['Administrador', 'Gerente' , 'Ventas'])
 def dashboard_inventario(request):
     hoy = datetime.now()
 
@@ -437,4 +447,100 @@ def eliminar_proveedor(request, proveedor_id):
         proveedor.delete()
         return redirect('lista_proveedores')
     return render(request, 'eliminar_proveedor.html', {'proveedor': proveedor})
+
+
+@roles_permitidos(['Administrador', 'Cajero', 'Ventas', 'Gerente'])
+def ver_ticket(request, folio):
+    venta = get_object_or_404(Venta, folio=folio)
+    detalles = DetalleVenta.objects.filter(venta=venta)
+
+    # Agregar el subtotal directamente al objeto detalle
+    for d in detalles:
+        d.subtotal = d.cantidad * d.precio_unitario
+
+    return render(request, 'ver_ticket.html', {
+        'venta': venta,
+        'detalles': detalles
+    })
+
+
+@csrf_exempt
+def registrar_venta(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            items = data.get('items', [])
+            metodo_pago = data.get('metodo_pago')
+
+            if not items:
+                return JsonResponse({'success': False, 'error': 'No hay productos en el ticket'}, status=400)
+
+            total_calculado = 0
+            detalles_a_guardar = []
+
+            # 🔎 Validar stock antes de crear la venta
+            for item in items:
+                producto = Producto.objects.get(id=item['id'])
+                cantidad = int(item['qty'])
+
+                if producto.stock < cantidad:
+                    return JsonResponse({
+                        'success': False,
+                        'error': f"Stock insuficiente para '{producto.nombre}'. Disponible: {producto.stock}, solicitado: {cantidad}"
+                    }, status=400)
+
+            # ✅ Crear la venta con total temporal
+            venta = Venta.objects.create(
+                usuario=request.user,
+                total=0,
+                metodo_pago=metodo_pago
+            )
+
+            # 🧾 Crear los detalles y descontar stock
+            for item in items:
+                producto = Producto.objects.get(id=item['id'])
+                cantidad = int(item['qty'])
+                precio = float(item['price'])
+
+                subtotal = cantidad * precio
+                total_calculado += subtotal
+
+                DetalleVenta.objects.create(
+                    venta=venta,
+                    producto=producto,
+                    cantidad=cantidad,
+                    precio_unitario=precio
+                )
+
+                # Descontar stock
+                producto.stock -= cantidad
+                producto.save()
+
+                print(f"✅ Agregado: {producto.nombre} x{cantidad} - ${precio}")
+                print(f"📦 Nuevo stock de {producto.nombre}: {producto.stock}")
+
+            # Guardar el total final
+            venta.total = total_calculado
+            venta.save()
+            venta.refresh_from_db()
+
+            return JsonResponse({
+                'success': True,
+                'folio': venta.folio,
+                'fecha': venta.fecha.strftime('%d/%m/%Y %H:%M'),
+                'metodo_pago': venta.metodo_pago
+            })
+
+        except Exception as e:
+            print(f"❌ Error al registrar venta: {e}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+
+
+
+@roles_permitidos(['Administrador', 'Cajero', 'Ventas', 'Gerente'])
+def historial_ventas(request):
+    ventas = Venta.objects.all().order_by('-fecha')  # 👈 así ordenas por fecha descendente
+    return render(request, 'historial_ventas.html', {'ventas': ventas})
 

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Ticket de Venta{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>🧾 Ticket de Venta</h2>
+  <hr>
+  <p><strong>Folio:</strong> {{ venta.folio }}</p>
+  <p><strong>Fecha:</strong> {{ venta.fecha|date:"d/m/Y H:i" }}</p>
+  <p><strong>Usuario:</strong> {{ venta.usuario.username }}</p>
+
+  <table class="table table-bordered mt-3">
+    <thead class="table-dark">
+      <tr>
+        <th>Producto</th>
+        <th>Cantidad</th>
+        <th>Precio Unitario</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for detalle in detalles %}
+      <tr>
+        <td>{{ detalle.producto.nombre }}</td>
+        <td>{{ detalle.cantidad }}</td>
+        <td>${{ detalle.precio_unitario|floatformat:2 }}</td>
+        <td>${{ detalle.subtotal|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h4 class="mt-3">Total: ${{ venta.total|floatformat:2 }}</h4>
+
+  <button class="btn btn-dark mt-3" onclick="window.print()">🖨️ Imprimir Ticket</button>
+</div>
+{% endblock %}

@@ -1,15 +1,20 @@
-<!-- templates/crear_proveedor.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Nuevo Proveedor</title>
-</head>
-<body>
-    <h1>Dar de alta proveedor</h1>
-    <form method="post">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'tasks/css/eliminar.css' %}">
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4 text-success">➕ Agregar Nuevo Proveedor</h2>
+
+    <form method="POST" class="card p-4 shadow-sm bg-white mx-auto" style="max-width: 600px;">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit">Guardar</button>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a href="{% url 'lista_proveedores' %}" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
     </form>
-</body>
-</html>
+</div>
+{% endblock %}

@@ -1,14 +1,42 @@
-<!-- templates/lista_proveedores.html -->
-<h1>Lista de Proveedores</h1>
-<ul>
-    {% for proveedor in proveedores %}
-        <li>
-            {{ proveedor.nombre }} - {{ proveedor.telefono }} - {{ proveedor.direccion }}
-            |
-            <a href="{% url 'editar_proveedor' proveedor.id %}">Editar</a>
-            |
-            <a href="{% url 'eliminar_proveedor' proveedor.id %}">Eliminar</a>
-        </li>
-    {% endfor %}
-</ul>
-<a href="{% url 'crear_proveedor' %}">Agregar nuevo proveedor</a>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'tasks/css/eliminar.css' %}">
+<script src="{% static 'tasks/js/eliminar.js' %}" defer></script>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-primary">📋 Lista de Proveedores</h2>
+        <a href="{% url 'crear_proveedor' %}" class="btn btn-success">➕ Agregar nuevo proveedor</a>
+    </div>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Teléfono</th>
+                <th>Dirección</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for proveedor in proveedores %}
+                <tr>
+                    <td>{{ proveedor.nombre }}</td>
+                    <td>{{ proveedor.telefono }}</td>
+                    <td>{{ proveedor.direccion }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'editar_proveedor' proveedor.id %}" class="btn btn-warning btn-sm me-2">✏️ Editar</a>
+                        <a href="{% url 'eliminar_proveedor' proveedor.id %}" class="btn btn-danger btn-sm confirmar-eliminar">🗑️ Eliminar</a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No hay proveedores registrados.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -84,6 +84,10 @@ function agregarProductoAlTicket(producto) {
       item.dataset.cantidad = nuevaCantidad;
       item.querySelector(".texto-producto").innerHTML =
         `${producto.nombre}<br><small>Cantidad: ${nuevaCantidad} | Subtotal: $${subtotal}</small>`;
+
+      const existente = ticket.find(p => p.id == producto.id);
+      if (existente) existente.qty = nuevaCantidad;
+
       encontrado = true;
     }
   });
@@ -109,16 +113,26 @@ function agregarProductoAlTicket(producto) {
       let cantidad = parseInt(li.dataset.cantidad) - 1;
       if (cantidad <= 0) {
         li.remove();
+        ticket = ticket.filter(p => p.id != producto.id);
       } else {
         li.dataset.cantidad = cantidad;
         let subtotal = (cantidad * parseFloat(li.dataset.price)).toFixed(2);
         li.querySelector(".texto-producto").innerHTML =
           `${li.dataset.name}<br><small>Cantidad: ${cantidad} | Subtotal: $${subtotal}</small>`;
+        const prod = ticket.find(p => p.id == producto.id);
+        if (prod) prod.qty = cantidad;
       }
       actualizarTotal();
     });
 
     lista.appendChild(li);
+
+    ticket.push({
+      id: producto.id,
+      name: producto.nombre,
+      qty: 1,
+      price: parseFloat(producto.precio)
+    });
   }
 
   actualizarTotal();
@@ -137,7 +151,7 @@ function actualizarTotal() {
 function generarTicketImprimible(folio = "Sin folio", fecha = "", metodoPago = "") {
   const ventana = window.open('', '_blank', 'width=400,height=600,noopener=no');
   if (!ventana || !ventana.document) {
-    alert("❌ No se pudo abrir la ventana del ticket. Desactiva el bloqueador de ventanas emergentes.");
+    alert("❌ No se pudo abrir la ventana del ticket.");
     return;
   }
 
@@ -163,67 +177,83 @@ function generarTicketImprimible(folio = "Sin folio", fecha = "", metodoPago = "
 }
 
 
+// ========== ENVIAR TICKET ==========
 function vistaPreviaTicket() {
-  const efectivoInput = document.getElementById("efectivo").value;
-  const totalTexto = document.getElementById("total").textContent.replace("$", "");
-  const total = parseFloat(totalTexto);
-  const efectivo = parseFloat(efectivoInput);
-  const metodoPago = document.getElementById("metodo-pago").value || "efectivo";
+  const items = ticket.map(item => ({
+    id: item.id,
+    qty: item.qty,
+    price: item.price
+  }));
 
-  if (isNaN(efectivo) || efectivo < total) {
-    alert("❌ El efectivo recibido no es suficiente para cubrir el total de la venta.");
+  if (items.length === 0) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Ticket vacío',
+      text: 'No hay productos en el ticket.',
+      confirmButtonText: 'Entendido'
+    });
     return;
   }
 
-  ticket = [];
-  document.querySelectorAll("#ticket-list li").forEach(item => {
-    const id = item.dataset.id;
-    const qty = item.dataset.cantidad;
-    const name = item.dataset.name;
-    const price = item.dataset.price;
-    ticket.push({ id, qty, name, price });
-  });
+  const total = parseFloat(document.getElementById("total").textContent.replace('$', '')) || 0;
+  const efectivo = parseFloat(document.getElementById("efectivo").value);
+  const metodo_pago = document.getElementById("metodo-pago").value;
 
-  // 🔸 Descontar stock
-  ticket.forEach(item => {
-    descontarStockDelServidor(item.id, item.qty);
-  });
+  if (isNaN(efectivo) || efectivo < total) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Efectivo insuficiente',
+      text: 'Debes ingresar un monto igual o mayor al total de la venta para continuar.'
+    });
+    return;
+  }
 
-  // 🔸 Registrar venta
-  fetch('/registrar_venta/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCookie('csrftoken')
-    },
-    body: JSON.stringify({
-      total: total,
-      items: ticket,
-      metodo_pago: metodoPago
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      console.log("✅ Venta registrada con folio:", data.folio);
-      generarTicketImprimible(data.folio, data.fecha, data.metodo_pago);
-    } else {
-      alert("❌ Error al registrar la venta: " + data.error);
+  Swal.fire({
+    title: '¿Deseas finalizar la venta?',
+    html: `<p>Total: <strong>$${total.toFixed(2)}</strong></p><p>Método: ${metodo_pago}</p>`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, cobrar',
+    cancelButtonText: 'Cancelar'
+  }).then(result => {
+    if (result.isConfirmed) {
+      // Enviar al backend
+      fetch('/registrar_venta/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ items, total, metodo_pago })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          Swal.fire({
+            icon: 'success',
+            title: '✅ Venta guardada',
+            html: `<strong>Folio:</strong> ${data.folio}<br><strong>Método:</strong> ${data.metodo_pago}<br><strong>Fecha:</strong> ${data.fecha}`,
+            confirmButtonText: 'Aceptar'
+          }).then(() => location.reload());
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al guardar',
+            text: data.error || 'Error desconocido'
+          });
+        }
+      })
+      .catch(err => {
+        console.error("Error en fetch:", err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Fallo de conexión',
+          text: 'Intenta nuevamente.'
+        });
+      });
     }
-
-    // 🔸 Limpieza visual
-    document.getElementById("ticket-list").innerHTML = "";
-    document.getElementById("total").textContent = "$0.00";
-    document.getElementById("efectivo").value = "";
-    document.getElementById("cambio").textContent = "$0.00";
-  })
-  .catch(err => {
-    alert("❌ Fallo de conexión al registrar venta: " + err.message);
   });
 }
-
-// 👇 Coloca aquí el resto de tus funciones como escáner, búsqueda, stock, teclado, etc...
-
 
 
 
@@ -237,33 +267,27 @@ function descontarStockDelServidor(productoId, cantidadVendida) {
     },
     body: JSON.stringify({ cantidad: cantidadVendida })
   })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        const productElement = document.querySelector(`.product[data-id="${productoId}"]`);
-        if (productElement) {
-          productElement.setAttribute("data-stock", data.nuevo_stock);
-
-          const stockInfo = productElement.querySelector(".stock-info");
-          if (data.nuevo_stock === 0) {
-            stockInfo.textContent = "Agotado";
-            stockInfo.classList.add("agotado");
-            productElement.classList.add("sin-stock");
-          } else {
-            stockInfo.textContent = `Disponibles: ${data.nuevo_stock}`;
-            stockInfo.classList.remove("agotado");
-            productElement.classList.remove("sin-stock");
-          }
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      const productElement = document.querySelector(`.product[data-id="${productoId}"]`);
+      if (productElement) {
+        productElement.setAttribute("data-stock", data.nuevo_stock);
+        const stockInfo = productElement.querySelector(".stock-info");
+        if (data.nuevo_stock === 0) {
+          stockInfo.textContent = "Agotado";
+          stockInfo.classList.add("agotado");
+          productElement.classList.add("sin-stock");
+        } else {
+          stockInfo.textContent = `Disponibles: ${data.nuevo_stock}`;
+          stockInfo.classList.remove("agotado");
+          productElement.classList.remove("sin-stock");
         }
-      } else {
-        alert("❌ Error al actualizar el stock: " + data.error);
       }
-    })
-    .catch(async (error) => {
-      const text = await error.text?.();
-      alert("❌ Falló la conexión al servidor: " + error.message + (text ? `\n\n${text}` : ""));
-    });
+    }
+  });
 }
+
 
 function getCookie(name) {
   let cookieValue = null;
@@ -280,7 +304,7 @@ function getCookie(name) {
   return cookieValue;
 }
 
-// ========== TECLADO NUMÉRICO ==========
+// ========== TECLADO ==========
 function insertarNumero(num) {
   const input = document.getElementById("efectivo");
   if (num === "." && input.value.includes(".")) return;
@@ -297,16 +321,14 @@ function borrarTodo() {
 function calcularCambio() {
   const efectivo = parseFloat(document.getElementById("efectivo").value);
   const total = parseFloat(document.getElementById("total").textContent.replace('$', ''));
-
   let cambio = 0;
   if (!isNaN(efectivo) && efectivo >= total) {
     cambio = (efectivo - total).toFixed(2);
   }
-
   document.getElementById("cambio").textContent = `$${cambio}`;
 }
 
-// ========== CLIC EN PRODUCTOS ==========
+// ========== EVENTOS ==========
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".product").forEach(prod => {
     prod.addEventListener("click", () => {
@@ -329,5 +351,3 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
-
-

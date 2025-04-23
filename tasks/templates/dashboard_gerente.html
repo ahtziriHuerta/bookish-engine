@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">📊 Panel del Gerente - {{ mes }}</h2>
+
+    <div class="row text-center mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h5>Ventas del Mes</h5>
+                <h3>{{ total_ventas }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h5>Ingresos Totales</h5>
+                <h3>${{ total_ingresos }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h5>Entradas de Inventario</h5>
+                <h3>{{ total_entradas }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm p-3">
+                <h5>Salidas de Inventario</h5>
+                <h3>{{ total_egresos }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="mt-5">📦 Productos con Stock Bajo</h4>
+    {% if stock_bajo %}
+        <ul class="list-group">
+            {% for producto in stock_bajo %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ producto.nombre }}
+                    <span class="badge bg-danger">{{ producto.stock }} unidades</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-success mt-3">✅ Todos los productos tienen stock suficiente.</p>
+    {% endif %}
+</div>
+{% endblock %}
