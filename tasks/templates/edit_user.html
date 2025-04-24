@@ -2,8 +2,80 @@
 {% load static %}
 
 {% block content %}
+<style>
+  :root {
+    --gris-oscuro: #343a40; /* Gris oscuro */
+    --azul: #007bff;
+    --azul-claro: #66b3ff;
+    --gris-borde: #dee2e6;
+    --gris-fondo: #f1f5f9;
+    --texto: #495057;
+  }
+
+
+  form {
+    max-width: 800px;
+    margin: auto;
+    border-radius: 1rem;
+    border: 1px solid var(--gris-borde);
+    background-color: white;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: var(--texto);
+    margin-bottom: 0.5rem;
+  }
+
+  .form-control, .form-select, textarea {
+    border-radius: 0.5rem;
+    border: 1px solid var(--gris-borde);
+    padding: 0.65rem;
+    font-size: 0.95rem;
+    width: 100%;
+  }
+
+  .form-control:focus, .form-select:focus, textarea:focus {
+    border-color: var(--azul);
+    outline: none;
+    box-shadow: 0 0 0 0.15rem var(--azul-claro);
+  }
+
+  .btn-success {
+    background-color: var(--azul);
+    border: none;
+    padding: 0.6rem 1.8rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+
+  .btn-success:hover {
+    background-color: #0056b3;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    padding: 0.6rem 1.8rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+
+  .btn-secondary:hover {
+    background-color: #5a6368;
+  }
+
+  .text-center {
+    margin-top: 1.5rem;
+  }
+</style>
+
 <div class="container mt-4">
-    <h2 class="text-center">Editar Usuario</h2>
+    <h2 class="text-center mb-4" style="color: #343a40;">Editar Usuario</h2>
 
     {% if messages %}
         <div class="alert alert-info">
@@ -66,4 +138,5 @@
         </div>
     </form>
 </div>
+
 {% endblock %}

@@ -1,14 +1,82 @@
 {% extends 'base.html' %}
 {% block title %}Panel de Inventario{% endblock %}
 {% block content %}
+
+<style>
+  :root {
+    --gris-claro: #f8f9fa;
+    --gris-hover: #f1f3f5;
+    --borde-suave: #dee2e6;
+    --texto: #495057;
+    --verde-suave: #d2f4d2;
+    --rojo-suave: #f8d7da;
+    --verde: #3d9970;
+    --rojo: #d9534f;
+  }
+
+  .card {
+    border-radius: 1rem;
+    border: 1px solid var(--borde-suave);
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  }
+
+  .card .card-body {
+    padding: 1.5rem;
+  }
+
+  .card-title {
+    color: var(--texto);
+    font-weight: 500;
+  }
+
+  .card-text.display-6 {
+    font-weight: 600;
+    font-size: 2rem;
+  }
+
+  .text-success {
+    color: var(--verde);
+  }
+
+  .text-danger {
+    color: var(--rojo);
+  }
+
+  .card.border-success {
+    border-left: 8px solid var(--verde);
+    background-color: var(--verde-suave);
+  }
+
+  .card.border-danger {
+    border-left: 8px solid var(--rojo);
+    background-color: var(--rojo-suave);
+  }
+
+  table thead {
+    background-color: var(--gris-claro);
+    color: var(--texto);
+    font-weight: 500;
+  }
+
+  table tbody tr:hover {
+    background-color: var(--gris-hover);
+  }
+
+  h1 {
+    color: var(--texto);
+    font-weight: 600;
+  }
+</style>
+
 <div class="container">
-  <h1 class="mb-4">Panel de Inventario</h1>
+  <h1 class="mb-4">📦 Panel de Inventario</h1>
 
   <div class="row mb-4">
     <div class="col-md-6">
       <div class="card border-success">
         <div class="card-body">
-          <h5 class="card-title">Total de productos dados de alta (entradas)</h5>
+          <h5 class="card-title">Productos dados de alta</h5>
           <p class="card-text display-6 text-success">{{ total_entradas }} unidades</p>
         </div>
       </div>
@@ -16,7 +84,7 @@
     <div class="col-md-6">
       <div class="card border-danger">
         <div class="card-body">
-          <h5 class="card-title">Total de productos dados de baja (egresos)</h5>
+          <h5 class="card-title">Productos dados de baja</h5>
           <p class="card-text display-6 text-danger">{{ total_egresos }} unidades</p>
         </div>
       </div>
@@ -24,9 +92,9 @@
   </div>
 
   <div class="card mb-4">
-    <div class="card-header">Inventario actual por producto</div>
+    <div class="card-header fw-semibold">Inventario actual por producto</div>
     <div class="card-body p-0">
-      <table class="table table-striped mb-0">
+      <table class="table table-hover mb-0">
         <thead>
           <tr>
             <th>Producto</th>
@@ -44,7 +112,7 @@
             <td class="text-danger">-{{ item.total_egresos }}</td>
           </tr>
           {% empty %}
-          <tr><td colspan="4">No hay productos registrados.</td></tr>
+          <tr><td colspan="4" class="text-center">No hay productos registrados.</td></tr>
           {% endfor %}
         </tbody>
       </table>

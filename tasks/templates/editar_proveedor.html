@@ -5,15 +5,34 @@
 <link rel="stylesheet" href="{% static 'tasks/css/eliminar.css' %}">
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4 text-primary">✏️ Editar Proveedor</h2>
+    <h2 class="text-center mb-4" style="color: #343a40;"> Editar Proveedor</h2> <!-- Gris oscuro -->
 
     <form method="POST" class="card p-4 shadow-sm bg-white mx-auto" style="max-width: 600px;">
         {% csrf_token %}
-        {{ form.as_p }}
+        
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre:</label>
+            <input type="text" name="nombre" id="nombre" class="form-control" value="{{ form.nombre.value }}" required>
+        </div>
 
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary">Actualizar</button>
-            <a href="{% url 'lista_proveedores' %}" class="btn btn-secondary ms-2">Cancelar</a>
+        <div class="mb-3">
+            <label for="telefono" class="form-label">Teléfono:</label>
+            <input type="text" name="telefono" id="telefono" class="form-control" value="{{ form.telefono.value }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="correo" class="form-label">Correo:</label>
+            <input type="email" name="correo" id="correo" class="form-control" value="{{ form.correo.value }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="direccion" class="form-label">Dirección:</label>
+            <textarea name="direccion" id="direccion" class="form-control" required>{{ form.direccion.value }}</textarea>
+        </div>
+
+        <div class="text-center mt-3">
+            <button type="submit" class="btn btn-success px-4 py-2 rounded-2">Actualizar</button>
+            <a href="{% url 'lista_proveedores' %}" class="btn btn-secondary ms-2 px-4 py-2 rounded-2">Cancelar</a>
         </div>
     </form>
 </div>

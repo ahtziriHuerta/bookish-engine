@@ -1,19 +1,94 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Crear Producto</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
-  <div class="container mt-5">
-    <h2 class="mb-4">Registrar nuevo producto</h2>
-    <form method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm bg-white">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" class="btn btn-success mt-3">Guardar</button>
-    </form>
+
+{% block content %}
+<style>
+  :root {
+    --naranja: #ff7b2e;
+    --gris-fondo: #f8f9fa;
+    --gris-borde: #dee2e6;
+    --texto: #495057;
+  }
+
+  h2 {
+    color: var(--naranja);
+    font-weight: 600;
+  }
+
+  form.card {
+    max-width: 850px;
+    margin: auto;
+    background-color: #fff;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  label {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--texto);
+  }
+
+  input, select, textarea {
+    border-radius: 0.5rem;
+    padding: 0.65rem;
+    font-size: 0.95rem;
+    border: 1px solid var(--gris-borde);
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--naranja);
+    outline: none;
+    box-shadow: 0 0 0 0.15rem rgba(255, 123, 46, 0.25);
+  }
+
+  .btn-success {
+    background-color: var(--naranja);
+    border: none;
+    padding: 0.6rem 1.8rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+
+  .btn-success:hover {
+    background-color: #e2661d;
+  }
+</style>
+
+<h2 class="text-center mb-4" style="color: #343a40;">Registrar Nuevo Producto</h2>
+
+<form method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm bg-white">
+  {% csrf_token %}
+  <div class="mb-3">
+    <label for="{{ form.nombre_producto.id_for_label }}" class="form-label">{{ form.nombre_producto.label }}</label>
+    {{ form.nombre_producto }}
   </div>
-</body>
-</html>
+  <div class="mb-3">
+    <label for="{{ form.precio.id_for_label }}" class="form-label">{{ form.precio.label }}</label>
+    {{ form.precio }}
+  </div>
+  <div class="mb-3">
+    <label for="{{ form.descripcion.id_for_label }}" class="form-label">{{ form.descripcion.label }}</label>
+    {{ form.descripcion }}
+  </div>
+  <div class="mb-3">
+    <label for="{{ form.imagen.id_for_label }}" class="form-label">{{ form.imagen.label }}</label>
+    {{ form.imagen }}
+  </div>
+  <div class="mb-3">
+    <label for="{{ form.stock.id_for_label }}" class="form-label">{{ form.stock.label }}</label>
+    {{ form.stock }}
+  </div>
+  <div class="mb-3">
+    <label for="{{ form.categoria.id_for_label }}" class="form-label">{{ form.categoria.label }}</label>
+    {{ form.categoria }}
+  </div>
+
+  <div class="text-center">
+    <button type="submit" class="btn btn-success px-4 py-2 rounded-2"> Guardar</button>
+  </div>
+</form>
+{% endblock %}

@@ -1,12 +1,19 @@
 .grafico-container {
   position: relative;
   width: 80%;
-  max-width: 400px; /* puedes ajustarlo a tu gusto */
+  max-width: 400px;
   height: auto;
-  margin: 0 auto;
+  margin: 30px auto;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 20px;
 }
 
+/* Gráfico de método de pago */
 #graficoMetodoPago {
   width: 100% !important;
   height: auto !important;
+  display: block;
+  margin: 0 auto;
 }

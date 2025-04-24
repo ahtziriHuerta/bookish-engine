@@ -161,33 +161,26 @@ input#codigoManual {
 
 .teclado {
   position: fixed;
-  bottom: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #f1e3cd;
+  bottom: 30px;
+  right: 30px;
+  background: #fdf6ee;
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
   z-index: 9999;
 
   display: grid;
-  grid-template-columns: repeat(3, 70px); /* 3 columnas de 70px */
+  grid-template-columns: repeat(3, 70px);
   gap: 10px;
 
   width: max-content;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.teclado.visible {
-  opacity: 1;
+  opacity: 1; /* Visibilidad forzada para pruebas */
   pointer-events: all;
 }
 
 .tecla {
-  background: #c9a57d;
-  color: white;
+  background: white;
+  color: #333;
   font-size: 24px;
   font-weight: bold;
   text-align: center;
@@ -197,15 +190,15 @@ input#codigoManual {
   border-radius: 12px;
   cursor: pointer;
   user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   transition: 0.1s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .tecla:hover {
-  background: #a98665;
+  background: #f0f0f0;
 }
+
+
 
 .product.sin-stock {
   opacity: 0.5;

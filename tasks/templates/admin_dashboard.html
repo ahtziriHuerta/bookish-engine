@@ -2,72 +2,66 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="text-center mb-4">📊 Dashboard de Administrador</h2>
-   
-    
+<div style="max-width: 1200px; margin: 40px auto; padding: 0 20px; font-family: 'Poppins', sans-serif;">
+  <h2 style="color: #343a40; text-align: center; font-size: 32px; margin-bottom: 40px;">Panel de Administración 🧩</h2>
+  {% if messages %}
+    <div style="background-color: #fff8e1; border-left: 6px solid #ff6f00; padding: 16px 20px; border-radius: 12px; margin-bottom: 30px;">
+      {% for message in messages %}
+        <p style="margin: 0; color: #795548;">{{ message }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
 
-    <!-- Mensajes de éxito o error -->
-    {% if messages %}
-        <div class="alert alert-success text-center">
-            {% for message in messages %}
-                <p class="mb-0">{{ message }}</p>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    <!-- Sección para gestionar roles -->
-    <div class="card mb-4">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">🛠 Gestionar Roles</h5>
-        </div>
-        <div class="card-body">
-            <form method="POST" class="d-flex">
-                {% csrf_token %}
-                <input type="text" name="nombre_rol" class="form-control me-2" placeholder="Nuevo Rol" required>
-                <button type="submit" class="btn btn-success">Agregar Rola</button>
-            </form>
-        </div>
+  <div style="display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 40px;">
+    <!-- Gestionar Roles -->
+    <div style="flex: 1 1 45%; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
+      <h4 style="color: #ff6f00; margin-bottom: 20px;">🛠 Crear Nuevo Rol</h4>
+      <form method="POST" style="display: flex; flex-direction: column; gap: 12px;">
+        {% csrf_token %}
+        <input type="text" name="nombre_rol" placeholder="Nombre del Rol" required style="padding: 12px; border: 1px solid #ccc; border-radius: 10px;">
+        <button type="submit" style="background-color: #ff6f00; color: white; padding: 12px; border: none; border-radius: 10px;">Agregar Rol</button>
+      </form>
     </div>
 
-    <!-- Sección para gestionar usuarios -->
-    <div class="card">
-        <div class="card-header bg-info text-white">
-            <h5 class="mb-0">👤 Gestionar Usuarios</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-striped text-center">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Nombre de Usuario</th>
-                        <th>Rol</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for usuario in usuarios %}
-                        <tr>
-                            <td>{{ usuario.user.username }}</td>
-                            <td>{{ usuario.rol.nombre_rol }}</td>
-                            <td>
-                                <a href="{% url 'edit_user' usuario.id %}" class="btn btn-warning btn-sm">✏️ Editar</a>
-                                <a href="{% url 'delete_user' usuario.id %}" class="btn btn-danger btn-sm">🗑️ Eliminar</a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <!-- Crear Usuario -->
+    <div style="flex: 1 1 45%; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+      <h4 style="color: #ff6f00; margin-bottom: 20px;">👥 Crear Usuario</h4>
+      <p style="margin-bottom: 20px;">Accede rápidamente a la creación de usuarios desde aquí.</p>
+      <a href="{% url 'create_user' %}" style="background-color: #43a047; text-align: center; color: white; padding: 12px; text-decoration: none; border-radius: 10px;">➕ Crear Usuario</a>
     </div>
+  </div>
 
-    <!-- Botón para crear usuario -->
-    <div class="text-center mt-4">
-        <a href="{% url 'create_user' %}" class="btn btn-success btn-lg">➕ Crear Nuevo Usuario</a>
+  <!-- Tabla de Usuarios -->
+  <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
+    <h4 style="color: #ff6f00; margin-bottom: 20px;">📋 Lista de Usuarios Registrados</h4>
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead style="background-color: #ffe0b2;">
+          <tr>
+            <th style="padding: 12px; text-align: left;">👤 Usuario</th>
+            <th style="padding: 12px; text-align: left;">Rol</th>
+            <th style="padding: 12px; text-align: center;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for usuario in usuarios %}
+            <tr style="border-bottom: 1px solid #eee;">
+              <td style="padding: 12px;">{{ usuario.user.username }}</td>
+              <td style="padding: 12px;">{{ usuario.rol.nombre_rol }}</td>
+              <td style="padding: 12px; text-align: center;">
+                <a href="{% url 'edit_user' usuario.id %}" style="background-color: #ffb300; color: white; padding: 6px 12px; text-decoration: none; border-radius: 8px;">✏️</a>
+                <a href="{% url 'delete_user' usuario.id %}" style="background-color: #e53935; color: white; padding: 6px 12px; text-decoration: none; border-radius: 8px;">🗑️</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <!-- Botón para cerrar sesión -->
-    <div class="text-center mt-3">
-        <a href="{% url 'logout' %}" class="btn btn-danger btn-lg">🚪 Cerrar Sesión</a>
-    </div>
+  <!-- Cerrar sesión -->
+  <div style="text-align: center; margin-top: 40px;">
+    <a href="{% url 'logout' %}" style="background-color: #d32f2f; color: white; padding: 12px 24px; border-radius: 12px; text-decoration: none;"> Cerrar Sesión</a>
+  </div>
 </div>
 {% endblock %}

@@ -2,73 +2,115 @@
 {% load static %}
 
 {% block content %}
+<style>
+  .form-card {
+    max-width: 850px;
+    margin: auto;
+    background-color: #fff;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-label {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+
+  .form-control,
+  .form-select {
+    border-radius: 0.5rem;
+    padding: 0.65rem;
+    font-size: 0.95rem;
+  }
+
+  .btn-primary {
+    background-color: #ff7b2e;
+    border: none;
+    padding: 0.6rem 1.8rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  .btn-primary:hover {
+    background-color: #e2661d;
+  }
+
+  .alert-info {
+    background-color: #e6f2ff;
+    border-left: 5px solid #0d6efd;
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+</style>
+
 <div class="container mt-4">
-    <h2 class="text-center">Crear Nuevo Usuario</h2>
+  <h2 class="text-center mb-4">Crear Nuevo Usuario</h2>
 
-    {% if messages %}
-        <div class="alert alert-info">
-            {% for message in messages %}
-                <p class="{{ message.tags }}">{{ message }}</p>
-            {% endfor %}
-        </div>
-    {% endif %}
+  {% if messages %}
+    <div class="alert alert-info">
+      {% for message in messages %}
+        <p class="{{ message.tags }}">{{ message }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
 
-    <form method="POST" class="row g-3">
-        {% csrf_token %}
+  <form method="POST" class="form-card row g-3">
+    {% csrf_token %}
 
-        <div class="col-md-6">
-            <label for="username" class="form-label">Nombre de Usuario:</label>
-            <input type="text" name="username" id="username" class="form-control" required>
-        </div>
+    <div class="col-md-6">
+      <label for="username" class="form-label">Nombre de Usuario:</label>
+      <input type="text" name="username" id="username" class="form-control" required>
+    </div>
 
-        <div class="col-md-6">
-            <label for="password" class="form-label">Contraseña:</label>
-            <input type="password" name="password" id="password" class="form-control" required>
-        </div>
+    <div class="col-md-6">
+      <label for="password" class="form-label">Contraseña:</label>
+      <input type="password" name="password" id="password" class="form-control" required>
+    </div>
 
-        <div class="col-md-6">
-            <label for="rol" class="form-label">Rol:</label>
-            <select name="rol" id="rol" class="form-select" required>
-                <option value="" disabled selected>Selecciona un rol</option>
-                {% for rol in roles %}
-                    <option value="{{ rol.id }}">{{ rol.nombre_rol }}</option>
-                {% endfor %}
-            </select>
-        </div>
+    <div class="col-md-6">
+      <label for="rol" class="form-label">Rol:</label>
+      <select name="rol" id="rol" class="form-select" required>
+        <option value="" disabled selected>Selecciona un rol</option>
+        {% for rol in roles %}
+          <option value="{{ rol.id }}">{{ rol.nombre_rol }}</option>
+        {% endfor %}
+      </select>
+    </div>
 
-        <div class="col-md-6">
-            <label for="correo" class="form-label">Correo Electrónico:</label>
-            <input type="email" name="correo" id="correo" class="form-control" required>
-        </div>
+    <div class="col-md-6">
+      <label for="correo" class="form-label">Correo Electrónico:</label>
+      <input type="email" name="correo" id="correo" class="form-control" required>
+    </div>
 
-        <div class="col-md-6">
-            <label for="nombre" class="form-label">Nombre:</label>
-            <input type="text" name="nombre" id="nombre" class="form-control" required>
-        </div>
+    <div class="col-md-6">
+      <label for="nombre" class="form-label">Nombre:</label>
+      <input type="text" name="nombre" id="nombre" class="form-control" required>
+    </div>
 
-        <div class="col-md-6">
-            <label for="apellido" class="form-label">Apellido:</label>
-            <input type="text" name="apellido" id="apellido" class="form-control" required>
-        </div>
+    <div class="col-md-6">
+      <label for="apellido" class="form-label">Apellido:</label>
+      <input type="text" name="apellido" id="apellido" class="form-control" required>
+    </div>
 
-        <div class="col-md-6">
-            <label for="nss" class="form-label">NSS (Número de Seguro Social):</label>
-            <input type="text" name="nss" id="nss" class="form-control" required>
-        </div>
+    <div class="col-md-6">
+      <label for="nss" class="form-label">NSS (Número de Seguro Social):</label>
+      <input type="text" name="nss" id="nss" class="form-control" required>
+    </div>
 
-        <div class="col-md-6">
-            <label for="telefono" class="form-label">Teléfono:</label>
-            <input type="text" name="telefono" id="telefono" class="form-control" required>
-        </div>
+    <div class="col-md-6">
+      <label for="telefono" class="form-label">Teléfono:</label>
+      <input type="text" name="telefono" id="telefono" class="form-control" required>
+    </div>
 
-        <div class="col-12">
-            <label for="domicilio" class="form-label">Domicilio:</label>
-            <textarea name="domicilio" id="domicilio" class="form-control" required></textarea>
-        </div>
+    <div class="col-12">
+      <label for="domicilio" class="form-label">Domicilio:</label>
+      <textarea name="domicilio" id="domicilio" class="form-control" rows="3" required></textarea>
+    </div>
 
-        <div class="col-12 text-center">
-            <button type="submit" class="btn btn-primary mt-3">Crear Usuario</button>
-        </div>
-    </form>
+    <div class="col-12 text-center">
+      <button type="submit" class="btn btn-primary mt-3">Crear Usuario</button>
+    </div>
+  </form>
 </div>
 {% endblock %}

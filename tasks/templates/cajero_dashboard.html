@@ -1,25 +1,213 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Punto de Venta - Cajero</title>
   <link rel="stylesheet" href="{% static 'tasks/css/escaner.css' %}">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
   <script src="{% static 'tasks/js/escaner.js' %}" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    /* Barra de navegación */
+    .navbar {
+      background-color: #343a40;
+      border-radius: 8px 8px 0 0;
+      padding: 10px 0;
+    }
+
+    .navbar-nav .nav-link {
+      color: #fff;
+      font-size: 16px;
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+
+    .navbar-nav .nav-link:hover {
+      background-color: #ff7f00;
+      border-radius: 5px;
+    }
+
+    .navbar-brand {
+      color: #fff;
+      font-size: 24px;
+      font-weight: bold;
+      padding-left: 0;
+    }
+
+    .navbar-toggler-icon {
+      background-color: #fff;
+    }
+
+    .navbar-nav .nav-link {
+      color: #fff;
+      font-size: 16px;
+      margin: 0 15px;
+      text-decoration: none; /* Remueve subrayado */
+    }
+    
+    .navbar-nav .nav-link:hover {
+      background-color: #ff7f00;
+      border-radius: 5px;
+      text-decoration: none; /* Asegura que siga sin subrayado */
+    }
+    
+    .navbar {
+      background-color: #343a40;
+      border-radius: 8px 8px 0 0;
+      padding: 10px 0;
+    }
+    
+
+    /* Productos */
+    .products-panel {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 15px;
+    }
+
+    .product {
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .product img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .product .stock-info {
+      font-size: 14px;
+      color: #888;
+    }
+
+    .sin-stock {
+      opacity: 0.5;
+    }
+
+    .agotado {
+      color: red;
+    }
+
+    .ticket-panel {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+
+    .teclado {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .tecla {
+      background-color: #343a40;
+      color: white;
+      font-size: 20px;
+      padding: 15px;
+      text-align: center;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .tecla:hover {
+      background-color: #ff7f00;
+    }
+
+    /* Modal de escáner */
+    #modalEscaner {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    #modalContent {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Botones */
+    .btn {
+      background-color: #ff7f00;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: #e06b00;
+    }
+
+    /* Estilo de los inputs */
+    input, select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-top: 10px;
+    }
+  </style>
 </head>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <body>
+  <!-- Barra de navegación -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between;">
+    <a class="navbar-brand" href="{% url 'home' %}">Tienda Corozo</a>
+    <div id="navbarNav">
+      <ul class="navbar-nav" style="display: flex; flex-direction: row; list-style: none; margin: 0; padding: 0;">
+        <li class="nav-item"><a class="nav-link" href="{% url 'cajero_dashboard' %}">Caja</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'escanear_producto' %}">Escanear</a></li>
+        <!-- Agrega más secciones si necesitas -->
+      </ul>
+    </div>
+  </div>
+</nav>
+
+
+  <!-- Contenido principal -->
   <div class="container">
     <div class="products-panel">
-      <h2>Favorites</h2>
+      <h2>Productos</h2>
       <div class="grid" id="products">
         {% for producto in productos %}
         <div class="product {% if producto.stock == 0 %}sin-stock{% endif %}"
-             data-name="{{ producto.nombre }}"
-             data-price="{{ producto.precio }}"
-             data-stock="{{ producto.stock }}"
+             data-name="{{ producto.nombre }}" data-price="{{ producto.precio }}" data-stock="{{ producto.stock }}"
              data-id="{{ producto.id }}">
           {% if producto.imagen %}
             <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
@@ -35,8 +223,8 @@
         {% endfor %}
       </div>
       <input type="text" id="codigoManual" placeholder="Código de barras">
-      <button onclick="buscarProductoManual()" class="btn">🔍 Buscar producto</button>
-      <button onclick="abrirEscaner()" class="btn">📷 Escanear código</button>
+      <button onclick="buscarProductoManual()" class="btn">Buscar producto</button>
+      <button onclick="abrirEscaner()" class="btn">Escanear código</button>
     </div>
 
     <div class="ticket-panel">
@@ -48,25 +236,24 @@
         <p class="total">Total: <span id="total">$0.00</span></p>
         <div style="margin-top: 20px;">
           <label>Efectivo recibido:</label><br>
-          <input type="text" id="efectivo" placeholder="$0.00" inputmode="decimal"
-                 pattern="[0-9]*" oninput="calcularCambio()" style="padding: 8px; width: 150px;">
+          <input type="text" id="efectivo" placeholder="$0.00" inputmode="decimal" pattern="[0-9]*" oninput="calcularCambio()">
           <p>Cambio: <span id="cambio">$0.00</span></p>
           <div style="margin-top: 15px;">
             <label for="metodo-pago">Método de pago:</label><br>
-            <select id="metodo-pago" style="padding: 6px; width: 150px;">
+            <select id="metodo-pago">
               <option value="efectivo">Efectivo</option>
               <option value="tarjeta">Tarjeta</option>
               <option value="transferencia">Transferencia</option>
               <option value="vales">Vales</option>
             </select>
           </div>
-          
         </div>
-        <button onclick="vistaPreviaTicket()" class="btn">🧾 Terminar</button>
-        </div>
+        <button onclick="vistaPreviaTicket()" class="btn">Terminar</button>
       </div>
     </div>
+  </div>
 
+  <!-- Modal para escáner -->
   <div id="modalEscaner">
     <div id="modalContent">
       <h3>Escanea un producto</h3>
@@ -75,19 +262,92 @@
     </div>
   </div>
 
-  <div id="teclado-numerico" class="teclado">
-    <div class="tecla" onclick="insertarNumero('1')">1</div>
-    <div class="tecla" onclick="insertarNumero('2')">2</div>
-    <div class="tecla" onclick="insertarNumero('3')">3</div>
-    <div class="tecla" onclick="insertarNumero('4')">4</div>
-    <div class="tecla" onclick="insertarNumero('5')">5</div>
-    <div class="tecla" onclick="insertarNumero('6')">6</div>
-    <div class="tecla" onclick="insertarNumero('7')">7</div>
-    <div class="tecla" onclick="insertarNumero('8')">8</div>
-    <div class="tecla" onclick="insertarNumero('9')">9</div>
-    <div class="tecla" onclick="insertarNumero('0')">0</div>
-    <div class="tecla" onclick="insertarNumero('.')">.</div>
-    <div class="tecla" onclick="borrarTodo()">C</div>
+  <!-- Teclado numérico -->
+  <div id="teclado" class="teclado visible">
+    <div class="tecla">1</div>
+    <div class="tecla">2</div>
+    <div class="tecla">3</div>
+    <div class="tecla">4</div>
+    <div class="tecla">5</div>
+    <div class="tecla">6</div>
+    <div class="tecla">7</div>
+    <div class="tecla">8</div>
+    <div class="tecla">9</div>
+    <div class="tecla">0</div>
+    <div class="tecla">←</div>
   </div>
+  
+
+  <script>
+    function insertarNumero(numero) {
+      const input = document.getElementById("codigoManual");
+      input.value += numero;
+    }
+
+    function borrarUltimoCaracter() {
+      const input = document.getElementById("codigoManual");
+      input.value = input.value.slice(0, -1);
+    }
+
+    function calcularCambio() {
+      const total = parseFloat(document.getElementById('total').innerText.replace('$', ''));
+      const efectivo = parseFloat(document.getElementById('efectivo').value || 0);
+      const cambio = efectivo - total;
+      document.getElementById('cambio').innerText = `$${cambio.toFixed(2)}`;
+    }
+
+    function buscarProductoManual() {
+      const codigo = document.getElementById('codigoManual').value;
+      if (!codigo) {
+        alert('Por favor ingrese un código de barras');
+        return;
+      }
+
+      // Lógica para buscar el producto por el código
+      alert('Buscando producto con código: ' + codigo);
+    }
+
+    function abrirEscaner() {
+      document.getElementById('modalEscaner').style.display = 'flex';
+      iniciarEscaner();
+    }
+
+    function cerrarEscaner() {
+      document.getElementById('modalEscaner').style.display = 'none';
+      detenerEscaner();
+    }
+
+    function iniciarEscaner() {
+      // Código para iniciar el escáner con Quagga
+      Quagga.init({
+        inputStream: {
+          name: 'Live',
+          type: 'LiveStream',
+          constraints: {
+            facingMode: 'environment'
+          }
+        },
+        decoder: {
+          readers: ['ean_reader', 'ean_8_reader', 'code_128_reader']
+        }
+      }, function(err) {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        Quagga.start();
+      });
+
+      Quagga.onDetected(function(data) {
+        console.log(data);
+        const codigo = data.codeResult.code;
+        document.getElementById('codigoManual').value = codigo;
+      });
+    }
+
+    function detenerEscaner() {
+      Quagga.stop();
+    }
+  </script>
 </body>
 </html>

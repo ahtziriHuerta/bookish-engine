@@ -3,7 +3,7 @@
   {% for venta in ventas %}
     <li>
       Folio: {{ venta.folio }} | {{ venta.fecha }} | Total: ${{ venta.total }}
-      <a href="{% url 'ver_ticket' venta.folio %}">🧾 Ver ticket</a>
+      <a href="{% url 'ver_ticket' venta.folio %}">Ver ticket</a>
     </li>
   {% endfor %}
 </ul>
