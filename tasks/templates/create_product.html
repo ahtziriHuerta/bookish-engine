@@ -63,8 +63,8 @@
 <form method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm bg-white">
   {% csrf_token %}
   <div class="mb-3">
-    <label for="{{ form.nombre_producto.id_for_label }}" class="form-label">{{ form.nombre_producto.label }}</label>
-    {{ form.nombre_producto }}
+    <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label }}</label>
+    {{ form.nombre }}
   </div>
   <div class="mb-3">
     <label for="{{ form.precio.id_for_label }}" class="form-label">{{ form.precio.label }}</label>
@@ -83,8 +83,8 @@
     {{ form.stock }}
   </div>
   <div class="mb-3">
-    <label for="{{ form.categoria.id_for_label }}" class="form-label">{{ form.categoria.label }}</label>
-    {{ form.categoria }}
+      <label for="{{ form.proveedor.id_for_label }}" class="form-label">{{ form.proveedor.label }}</label>
+    {{ form.proveedor }}
   </div>
 
   <div class="text-center">

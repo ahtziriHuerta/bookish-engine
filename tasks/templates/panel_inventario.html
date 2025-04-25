@@ -97,19 +97,27 @@
       <table class="table table-hover mb-0">
         <thead>
           <tr>
+            <th>ID</th>
             <th>Producto</th>
             <th>Stock actual</th>
             <th>Entradas este mes</th>
             <th>Egresos este mes</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {% for item in inventario %}
           <tr>
+            <td>{{ item.producto.id }}</td>
             <td>{{ item.producto.nombre }}</td>
             <td>{{ item.stock_actual }}</td>
             <td class="text-success">+{{ item.total_entradas }}</td>
             <td class="text-danger">-{{ item.total_egresos }}</td>
+            <td>
+              <a href="{% url 'actualizar_stock' item.producto.id %}" class="btn btn-sm btn-outline-primary">
+                Editar stock
+              </a>
+            </td>
           </tr>
           {% empty %}
           <tr><td colspan="4" class="text-center">No hay productos registrados.</td></tr>
@@ -118,5 +126,8 @@
       </table>
     </div>
   </div>
+
+
+
 </div>
 {% endblock %}

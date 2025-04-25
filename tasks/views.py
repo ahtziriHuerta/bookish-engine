@@ -301,30 +301,37 @@ def escanear_view(request):
 
 
 @csrf_exempt
+@roles_permitidos(['Administrador','Ventas', 'Gerente'])
 def actualizar_stock(request, producto_id):
-    if not request.user.is_authenticated:
-        return JsonResponse({'success': False, 'error': 'No autenticado'}, status=403)
+    producto = get_object_or_404(Producto, id=producto_id)
 
     if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            cantidad_vendida = int(data.get('cantidad', 0))
+        nuevo_stock = int(request.POST.get('nuevo_stock'))
+        diferencia = nuevo_stock - producto.stock
 
-            producto = Producto.objects.get(id=producto_id)
+        if diferencia > 0:
+            # Registrar ingreso
+            IngresoProducto.objects.create(
+                producto=producto,
+                cantidad=diferencia,
+                fecha=datetime.now(),
+                usuario=request.user  # 👈 aquí está la clave
+            )
+        elif diferencia < 0:
+            # Registrar egreso
+            EgresoProducto.objects.create(
+                producto=producto,
+                cantidad=abs(diferencia),
+                fecha=datetime.now(),
+                usuario=request.user  # 👈 aquí también
+            )
 
-            if producto.stock >= cantidad_vendida:
-                producto.stock -= cantidad_vendida
-                producto.save()
-                return JsonResponse({'success': True, 'nuevo_stock': producto.stock})
-            else:
-                return JsonResponse({'success': False, 'error': 'Stock insuficiente'})
+        producto.stock = nuevo_stock
+        producto.save()
 
-        except Producto.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Producto no encontrado'})
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-
-    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
+        return redirect('dashboard_inventario')
+    
+    return render(request, 'actualizar_stock.html', {'producto': producto})
 
 
 

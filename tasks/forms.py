@@ -27,6 +27,9 @@ class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
         fields = ['nombre', 'descripcion', 'precio', 'stock', 'codigo_barras', 'proveedor', 'imagen']
+        widgets = {
+            'proveedor': forms.Select(attrs={'class': 'form-control'}),
+        }
 
 
 

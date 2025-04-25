@@ -12,21 +12,24 @@
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="{% static 'tasks/css/base.css' %}">
     <style>
+
         body {
-            font-family: 'Poppins', sans-serif;
+          font-family: 'Poppins', sans-serif;
+          background: linear-gradient(135deg, #F5F5DC, #D2B48C);
         }
 
         .navbar {
             background-color: #343a40; /* Color oscuro */
             border-radius: 8px 8px 0 0;
-            padding: 5px 0; /* Reduce el grosor de la barra */
+            padding: 10px 0; /* Reduce el grosor de la barra */
         }
 
         .navbar-nav .nav-link {
             color: #fff;
-            font-size: 16px;
-            margin-left: 20px; /* Añade espacio entre los enlaces */
-            margin-right: 20px; /* Añade espacio entre los enlaces */
+            font-size: 15pt;
+            text-align: center;
+            margin-left: 1cm; /* Añade espacio entre los enlaces */
+            margin-right: 1cm; /* Añade espacio entre los enlaces */
         }
 
         .navbar-nav .nav-link:hover {
@@ -40,7 +43,7 @@
             font-size: 24px;
             font-weight: bold;
             padding-left: 0; /* Alinea el nombre a la orilla */
-            margin-right: 30px; /* Espacio a la derecha para no estar pegado al borde */
+            margin-right: 1cm; /* Espacio a la derecha para no estar pegado al borde */
         }
 
         .navbar-toggler-icon {
@@ -50,6 +53,13 @@
         .text-danger {
             color: #d32f2f !important;
         }
+
+        #logo-img {
+          width: 100px;  /* Ajusta el valor según el tamaño que desees */
+          height: auto;  /* Mantiene la relación de aspecto */
+        }
+
+        
     </style>
 </head>
 <body>
@@ -57,7 +67,9 @@
 <!-- NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark">
   <div class="container">
-    <a class="navbar-brand" href="{% url 'home' %}">Tienda Corozo</a>
+    <!-- LOGO -->
+    
+    <a class="navbar-brand" href="{% url 'home' %}"><img src="{% static 'tasks/img/logo.png' %}" alt="Logo" class="logo-left" id="logo-img">Tienda Corozo</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
