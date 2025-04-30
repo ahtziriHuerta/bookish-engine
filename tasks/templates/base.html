@@ -21,15 +21,15 @@
         .navbar {
             background-color: #343a40; /* Color oscuro */
             border-radius: 8px 8px 0 0;
-            padding: 10px 0; /* Reduce el grosor de la barra */
+            padding: 5px 0; /* Reduce el grosor de la barra */
         }
 
         .navbar-nav .nav-link {
             color: #fff;
-            font-size: 15pt;
+            font-size: 12pt;
             text-align: center;
-            margin-left: 1cm; /* Añade espacio entre los enlaces */
-            margin-right: 1cm; /* Añade espacio entre los enlaces */
+            margin-left: 12px; /* Añade espacio entre los enlaces */
+            margin-right: 12px; /* Añade espacio entre los enlaces */
         }
 
         .navbar-nav .nav-link:hover {
@@ -40,10 +40,10 @@
 
         .navbar-brand {
             color: #fff;
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
             padding-left: 0; /* Alinea el nombre a la orilla */
-            margin-right: 1cm; /* Espacio a la derecha para no estar pegado al borde */
+            margin-right: 20px; /* Espacio a la derecha para no estar pegado al borde */
         }
 
         .navbar-toggler-icon {
@@ -102,6 +102,7 @@
         {% elif user_rol == "Cajero" %}
           <li class="nav-item"><a class="nav-link" href="{% url 'cajero_dashboard' %}">Caja</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'escanear_producto' %}">Escanear</a></li>
+          
         {% endif %}
 
         {% if request.user.is_authenticated %}

@@ -1,38 +1,20 @@
-
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Punto de Venta - Cajero</title>
-  <link rel="stylesheet" href="{% static 'tasks/css/escaner.css' %}">
-  <link rel="stylesheet" href="{% static 'tasks/css/cajero.css' %}">
+{% block title %}Punto de Venta - Cajero{% endblock %}
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-  <script src="{% static 'tasks/js/escaner.js' %}" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
-</head>
+{% block content %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
 
-<body>
-  <!-- Barra de navegación -->
-<nav class="navbar navbar-expand-lg navbar-dark">
-  <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; justify-content: space-between;">
-    <a class="navbar-brand" href="{% url 'home' %}">Tienda Corozo</a>
-    <div id="navbarNav">
-      <ul class="navbar-nav" style="display: flex; flex-direction: row; list-style: none; margin: 0; padding: 0;">
-        <li class="nav-item"><a class="nav-link" href="{% url 'cajero_dashboard' %}">Caja</a></li>
-        <li class="nav-item"><a class="nav-link" href="{% url 'escanear_producto' %}">Escanear</a></li>
-        <!-- Agrega más secciones si necesitas -->
-      </ul>
-    </div>
-  </div>
-</nav>
+<link rel="stylesheet" href="{% static 'tasks/css/escaner.css' %}">
+<link rel="stylesheet" href="{% static 'tasks/css/cajero.css' %}">
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+<script src="{% static 'tasks/js/escaner.js' %}" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{% static 'tasks/js/cajero.js' %}" defer></script>
 
-  <!-- Contenido principal -->
-  <div class="container">
+<!-- Contenido principal -->
+<div class="container">
     <div class="products-panel">
       <h2>Productos</h2>
       <div class="grid" id="products">
@@ -67,7 +49,7 @@
         <p class="total">Total: <span id="total">$0.00</span></p>
         <div style="margin-top: 20px;">
           <label>Efectivo recibido:</label><br>
-          <input type="text" id="efectivo" placeholder="$0.00" inputmode="decimal" pattern="[0-9]*" oninput="calcularCambio()">
+          <input type="text" id="efectivo" placeholder="$0.00" inputmode="decimal" pattern="[0-9]*" onclick="toggleNumpad()" oninput="calcularCambio()">
           <p>Cambio: <span id="cambio">$0.00</span></p>
           <div style="margin-top: 15px;">
             <label for="metodo-pago">Método de pago:</label><br>
@@ -104,83 +86,12 @@
       <button onclick="addDigit('7')">7</button>
       <button onclick="addDigit('8')">8</button>
       <button onclick="addDigit('9')">9</button>
-      <button onclick="clearPassword()">C</button>
+      <button onclick="addDigit('.')">.</button>
       <button onclick="addDigit('0')">0</button>
       <button onclick="backspace()">←</button>
     </div>
   </div>
   
 
-  <script>
-    function insertarNumero(numero) {
-      const input = document.getElementById("codigoManual");
-      input.value += numero;
-    }
-
-    function borrarUltimoCaracter() {
-      const input = document.getElementById("codigoManual");
-      input.value = input.value.slice(0, -1);
-    }
-
-    function calcularCambio() {
-      const total = parseFloat(document.getElementById('total').innerText.replace('$', ''));
-      const efectivo = parseFloat(document.getElementById('efectivo').value || 0);
-      const cambio = efectivo - total;
-      document.getElementById('cambio').innerText = `$${cambio.toFixed(2)}`;
-    }
-
-    function buscarProductoManual() {
-      const codigo = document.getElementById('codigoManual').value;
-      if (!codigo) {
-        alert('Por favor ingrese un código de barras');
-        return;
-      }
-
-      // Lógica para buscar el producto por el código
-      alert('Buscando producto con código: ' + codigo);
-    }
-
-    function abrirEscaner() {
-      document.getElementById('modalEscaner').style.display = 'flex';
-      iniciarEscaner();
-    }
-
-    function cerrarEscaner() {
-      document.getElementById('modalEscaner').style.display = 'none';
-      detenerEscaner();
-    }
-
-    function iniciarEscaner() {
-      // Código para iniciar el escáner con Quagga
-      Quagga.init({
-        inputStream: {
-          name: 'Live',
-          type: 'LiveStream',
-          constraints: {
-            facingMode: 'environment'
-          }
-        },
-        decoder: {
-          readers: ['ean_reader', 'ean_8_reader', 'code_128_reader']
-        }
-      }, function(err) {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        Quagga.start();
-      });
-
-      Quagga.onDetected(function(data) {
-        console.log(data);
-        const codigo = data.codeResult.code;
-        document.getElementById('codigoManual').value = codigo;
-      });
-    }
-
-    function detenerEscaner() {
-      Quagga.stop();
-    }
-  </script>
-</body>
-</html>
+  
+{% endblock %}
