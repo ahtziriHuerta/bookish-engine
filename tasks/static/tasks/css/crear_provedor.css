@@ -1,0 +1,67 @@
+:root {
+    --naranja: #ff7b2e;
+    --gris-borde: #dee2e6;
+    --gris-fondo: #f8f9fa;
+    --texto: #495057;
+  }
+
+  h2 {
+    color: var(--naranja);
+    font-weight: 600;
+  }
+
+  form.card {
+    max-width: 500px;
+    margin: auto;
+    border-radius: 1rem;
+    border: 1px solid var(--gris-borde);
+    background-color: white;
+    padding: 2rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  label {
+    font-weight: 600;
+    color: var(--texto);
+    margin-bottom: 0.5rem;
+  }
+
+  input, select, textarea {
+    border-radius: 0.5rem;
+    border: 1px solid var(--gris-borde);
+    padding: 0.65rem;
+    font-size: 0.95rem;
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--naranja);
+    outline: none;
+    box-shadow: 0 0 0 0.15rem rgba(255, 123, 46, 0.25);
+  }
+
+  .btn-success {
+    background-color: var(--naranja);
+    border: none;
+    padding: 0.6rem 1.8rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+
+  .btn-success:hover {
+    background-color: #e2661d;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    padding: 0.6rem 1.8rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+
+  .btn-secondary:hover {
+    background-color: #5a6368;
+  }

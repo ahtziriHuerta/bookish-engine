@@ -1,0 +1,53 @@
+:root {
+    --naranja: #ff7b2e;
+    --gris-fondo: #f8f9fa;
+    --gris-borde: #dee2e6;
+    --texto: #495057;
+  }
+
+  h2 {
+    color: var(--naranja);
+    font-weight: 600;
+  }
+
+  form.card {
+    max-width: 850px;
+    margin: auto;
+    background-color: #fff;
+    padding: 2.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  label {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--texto);
+  }
+
+  input, select, textarea {
+    border-radius: 0.5rem;
+    padding: 0.65rem;
+    font-size: 0.95rem;
+    border: 1px solid var(--gris-borde);
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--naranja);
+    outline: none;
+    box-shadow: 0 0 0 0.15rem rgba(255, 123, 46, 0.25);
+  }
+
+  .btn-success {
+    background-color: var(--naranja);
+    border: none;
+    padding: 0.6rem 1.8rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+  }
+
+  .btn-success:hover {
+    background-color: #e2661d;
+  }

@@ -194,3 +194,20 @@ input, select {
   .numpad button:hover {
     background-color: #c39b6c;
   }
+
+  .ticket-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .btn-quitar {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 2px 8px;
+    margin-left: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  

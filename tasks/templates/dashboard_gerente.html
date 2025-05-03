@@ -1,109 +1,97 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<style>
-  .card-metric {
-    height: 160px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    border-radius: 1rem;
-    position: relative;
-    overflow: hidden;
-    color: #333;
-    transition: transform 0.2s ease;
-  }
-
-  .card-metric:hover {
-    transform: scale(1.02);
-  }
-
-  .card-metric .icon-bg {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 4rem;
-    color: rgba(255, 255, 255, 0.2);
-  }
-
-  .ventas {
-    background: #f1f8ff;
-    border-left: 6px solid #2196f3;
-  }
-
-  .ingresos {
-    background: #eafaf1;
-    border-left: 6px solid #4caf50;
-  }
-
-  .entradas {
-    background: #fff8e1;
-    border-left: 6px solid #ff9800;
-  }
-
-  .salidas {
-    background: #ffeaea;
-    border-left: 6px solid #f44336;
-  }
-
-  h5 {
-    font-weight: 600;
-    margin-bottom: 10px;
-  }
-
-  h3 {
-    font-weight: bold;
-    margin: 0;
-  }
-
-  .list-group-item {
-    border-radius: 0.5rem;
-    margin-bottom: 0.5rem;
-  }
-</style>
-
 <div class="container mt-4">
-  <h2 class="text-center mb-4">📊 Panel del Gerente - {{ mes }}</h2>
+  <h2 class="text-center mb-4">📊 Dashboard del dia</h2>
 
-  <div class="row text-center mb-4">
-    <div class="col-md-3 col-sm-6 mb-3">
-      <div class="card shadow-sm p-3 card-metric ventas">
-        <h5>Ventas del Mes</h5>
+  <form method="get" class="text-center mb-4">
+    <label for="mes">Filtrar por mes:</label>
+    <input type="month" id="mes" name="mes" value="{{ mes_actual }}">
+    <button type="submit" class="btn btn-primary btn-sm">Aplicar</button>
+  </form>
+
+  {% if sin_ventas %}
+    <div class="alert alert-warning text-center">
+      ⚠️ No hay ventas registradas en el mes seleccionado.
+    </div>
+  {% endif %}
+
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card p-3 bg-light shadow-sm">
+        <h5>Total de Ventas:</h5>
         <h3>{{ total_ventas }}</h3>
       </div>
     </div>
-    <div class="col-md-3 col-sm-6 mb-3">
-      <div class="card shadow-sm p-3 card-metric ingresos">
-        <h5>Ingresos Totales</h5>
-        <h3>${{ total_ingresos }}</h3>
-      </div>
-    </div>
-    <div class="col-md-3 col-sm-6 mb-3">
-      <div class="card shadow-sm p-3 card-metric entradas">
-        <h5>Entradas de Inventario</h5>
-        <h3>{{ total_entradas }}</h3>
-      </div>
-    </div>
-    <div class="col-md-3 col-sm-6 mb-3">
-      <div class="card shadow-sm p-3 card-metric salidas">
-        <h5>Salidas de Inventario</h5>
-        <h3>{{ total_egresos }}</h3>
+    <div class="col-md-6">
+      <div class="card p-3 bg-light shadow-sm">
+        <h5>Ingresos Totales:</h5>
+        <h3>${{ ingresos_totales }}</h3>
       </div>
     </div>
   </div>
 
-  <h4 class="mt-5">📦 Productos con Stock Bajo</h4>
-  {% if stock_bajo %}
-    <ul class="list-group">
-      {% for producto in stock_bajo %}
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-          <span class="fw-bold">{{ producto.nombre }}</span>
-          <span class="badge bg-danger">{{ producto.stock }} unidades</span>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p class="text-success mt-3">✅ Todos los productos tienen stock suficiente.</p>
-  {% endif %}
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h5>📉 Productos con poco stock</h5>
+        <ul class="list-group">
+          {% for prod in productos_bajo_stock %}
+            <li class="list-group-item d-flex justify-content-between">
+              {{ prod.nombre }}
+              <span class="badge bg-warning text-dark">Stock: {{ prod.stock }}</span>
+            </li>
+          {% empty %}
+            <li class="list-group-item">Todos los productos tienen buen stock ✅</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h5>🔥 Productos más vendidos</h5>
+        <ul class="list-group">
+          {% for prod in productos_mas_vendidos %}
+            <li class="list-group-item d-flex justify-content-between">
+              {{ prod.producto__nombre }}
+              <span class="badge bg-success">Vendidos: {{ prod.cantidad_total }}</span>
+            </li>
+          {% empty %}
+            <li class="list-group-item">No hay ventas registradas.</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-4">
+    <h5 class="mb-3">📅 Ventas por Día</h5>
+    <canvas id="graficaVentas"></canvas>
+  </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('graficaVentas').getContext('2d');
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [{% for item in ventas_por_dia %}'{{ item.fecha_dia }}',{% endfor %}],
+      datasets: [{
+        label: 'Ventas del día',
+        data: [{% for item in ventas_por_dia %}{{ item.total_dia }},{% endfor %}],
+        borderColor: 'rgb(75, 192, 192)',
+        tension: 0.3,
+        fill: false
+      }]
+    },
+    options: {
+      scales: {
+        y: { beginAtZero: true }
+      }
+    }
+  });
+</script>
 {% endblock %}

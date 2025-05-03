@@ -1,77 +1,21 @@
 {% extends 'base.html' %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'tasks/css/dashboard_inventario.css' %}">
+
 {% block title %}Panel de Inventario{% endblock %}
+
 {% block content %}
-
-<style>
-  :root {
-    --gris-claro: #f8f9fa;
-    --gris-hover: #f1f3f5;
-    --borde-suave: #dee2e6;
-    --texto: #495057;
-    --verde-suave: #d2f4d2;
-    --rojo-suave: #f8d7da;
-    --verde: #3d9970;
-    --rojo: #d9534f;
-  }
-
-  .card {
-    border-radius: 1rem;
-    border: 1px solid var(--borde-suave);
-    background-color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-  }
-
-  .card .card-body {
-    padding: 1.5rem;
-  }
-
-  .card-title {
-    color: var(--texto);
-    font-weight: 500;
-  }
-
-  .card-text.display-6 {
-    font-weight: 600;
-    font-size: 2rem;
-  }
-
-  .text-success {
-    color: var(--verde);
-  }
-
-  .text-danger {
-    color: var(--rojo);
-  }
-
-  .card.border-success {
-    border-left: 8px solid var(--verde);
-    background-color: var(--verde-suave);
-  }
-
-  .card.border-danger {
-    border-left: 8px solid var(--rojo);
-    background-color: var(--rojo-suave);
-  }
-
-  table thead {
-    background-color: var(--gris-claro);
-    color: var(--texto);
-    font-weight: 500;
-  }
-
-  table tbody tr:hover {
-    background-color: var(--gris-hover);
-  }
-
-  h1 {
-    color: var(--texto);
-    font-weight: 600;
-  }
-</style>
-
 <div class="container">
   <h1 class="mb-4">📦 Panel de Inventario</h1>
 
+  <!-- 🔹 Filtro por mes -->
+  <form method="get" class="text-center mb-4">
+    <label for="mes">Filtrar por mes:</label>
+    <input type="month" id="mes" name="mes" value="{{ mes_actual }}">
+    <button type="submit" class="btn btn-primary btn-sm">Aplicar</button>
+  </form>
+
+  <!-- 🔹 Totales -->
   <div class="row mb-4">
     <div class="col-md-6">
       <div class="card border-success">
@@ -91,6 +35,7 @@
     </div>
   </div>
 
+  <!-- 🔹 Tabla de inventario -->
   <div class="card mb-4">
     <div class="card-header fw-semibold">Inventario actual por producto</div>
     <div class="card-body p-0">
@@ -100,8 +45,8 @@
             <th>ID</th>
             <th>Producto</th>
             <th>Stock actual</th>
-            <th>Entradas este mes</th>
-            <th>Egresos este mes</th>
+            <th>Entradas</th>
+            <th>Egresos</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -120,14 +65,11 @@
             </td>
           </tr>
           {% empty %}
-          <tr><td colspan="4" class="text-center">No hay productos registrados.</td></tr>
+          <tr><td colspan="6" class="text-center">No hay productos registrados.</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
   </div>
-
-
-
 </div>
 {% endblock %}

@@ -45,6 +45,7 @@
             <th>Método de Pago</th>
             <th>Total</th>
             <th>Ticket</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -55,21 +56,38 @@
             <td>{{ venta.usuario.username }}</td>
             <td>{{ venta.metodo_pago }}</td>
             <td>${{ venta.total|floatformat:2 }}</td>
+            
+
             <td>
               {% if venta.detalleventa_set.count > 0 %}
-                <a href="{% url 'ver_ticket' venta.folio %}" class="btn btn-outline-primary btn-sm" target="_blank">Ver Ticket</a>
+                <a href="{% url 'ver_ticket' venta.folio %}" class="btn btn-outline-primary btn-sm" target="_blank">
+                  Ver Ticket
+                </a>
               {% else %}
                 N/A
               {% endif %}
             </td>
+            <td>
+              {% if request.user.is_superuser %}
+              <form action="{% url 'eliminar_venta' venta.folio %}" method="post" style="display:inline;">
+
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-danger btn-sm"
+                          onclick="return confirm('¿Estás seguro de que deseas eliminar esta venta?');">
+                    🗑️ Eliminar
+                  </button>
+                </form>
+              {% endif %}
+            </td>
+            
           </tr>
           {% empty %}
-          <tr><td colspan="6" class="text-center">No hay ventas registradas este mes.</td></tr>
+          <tr><td colspan="7" class="text-center">No hay ventas registradas este mes.</td></tr>
           {% endfor %}
         </tbody>
         <tfoot>
           <tr class="table-secondary">
-            <td colspan="4" class="text-end fw-bold">TOTAL:</td>
+            <td colspan="5" class="text-end fw-bold">TOTAL:</td>
             <td colspan="2" class="fw-bold">${{ total_ingresos|floatformat:2 }}</td>
           </tr>
         </tfoot>

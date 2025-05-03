@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Reporte de Corte de Caja</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    h1 { text-align: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <h1>Corte de Caja</h1>
+  <p><strong>Desde:</strong> {{ fecha_inicio }} <strong>Hasta:</strong> {{ fecha_fin }}</p>
+  <p><strong>Total Ventas:</strong> ${{ total_ventas }}</p>
+
+  <h2>Resumen por Método de Pago</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Método</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in total_por_metodo %}
+      <tr>
+        <td>{{ item.metodo_pago }}</td>
+        <td>${{ item.total|floatformat:2 }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+<script>
+  window.onload = function() {
+    window.print();
+  };
+</script>
+
+</html>

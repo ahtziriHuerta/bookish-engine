@@ -40,9 +40,16 @@
     <div class="login-container">
       <h2>Iniciar Sesión</h2>
 
-      {% if error %}
-        <p class="error">{{ error }}</p>
-      {% endif %}
+      
+      {% if messages %}
+      {% for message in messages %}
+        {% if forloop.first %}
+          <p class="error">{{ message }}</p>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    
+
 
       <form method="POST">
         {% csrf_token %}
@@ -52,7 +59,8 @@
         </div>
 
         <div class="input-group">
-          <input type="password" name="password" id="password" placeholder="Contraseña" onclick="toggleNumpad()" onfocus="this.blur()" required />
+          <input type="password" name="password" id="password" placeholder="Contraseña" onclick="toggleNumpad()" required />
+ 
         </div>
 
         <div class="checkbox-group">

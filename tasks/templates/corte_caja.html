@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Corte de Caja</h2>
+<p><strong>Desde:</strong> {{ fecha_inicio|date:"d/m/Y H:i" }} — <strong>Hasta:</strong> {{ fecha_fin|date:"d/m/Y H:i" }}</p>
+<p><strong>Total:</strong> ${{ total_ventas|floatformat:2 }}</p>
+
+<h5>Métodos de pago</h5>
+<ul>
+  {% for m in total_por_metodo %}
+    <li>{{ m.metodo_pago }}: ${{ m.total|floatformat:2 }}</li>
+  {% endfor %}
+</ul>
+
+<h5>Tickets incluidos</h5>
+<table class="table table-bordered table-sm">
+  <thead><tr><th>Folio</th><th>Fecha</th><th>Método</th><th>Total</th></tr></thead>
+  <tbody>
+    {% for v in ventas_resumen %}
+    <tr>
+      <td>#{{ v.folio }}</td>
+      <td>{{ v.fecha|date:"d/m/Y H:i" }}</td>
+      <td>{{ v.metodo_pago }}</td>
+      <td>${{ v.total|floatformat:2 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<form method="post">
+  {% csrf_token %}
+  <button class="btn btn-success">✅ Realizar Corte</button>
+  <a href="?pdf=1" class="btn btn-outline-primary">🖨 Descargar PDF</a>
+  <a href="?enviar=1" class="btn btn-outline-secondary">📧 Enviar al Gerente</a>
+</form>
+{% endblock %}

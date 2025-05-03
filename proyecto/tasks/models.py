@@ -44,3 +44,14 @@ class Credencial(models.Model):
     contraseña = models.CharField(max_length=255)
 # Modelo para almacenar los datos personales de los usuarios
 
+
+class CorteCaja(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    fecha_inicio = models.DateTimeField()
+    fecha_fin = models.DateTimeField()
+    total_ventas = models.DecimalField(max_digits=10, decimal_places=2)
+    total_por_metodo = models.JSONField(default=dict)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.usuario.username} - Corte {self.fecha_inicio.strftime('%d/%m/%Y %H:%M')} → {self.fecha_fin.strftime('%H:%M')}"

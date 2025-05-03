@@ -1,9 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
 import uuid
+import qrcode
+
+from django.conf import settings
 
 # Create your models here.
-
+import os
 class Task(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -52,20 +55,42 @@ class Proveedor(models.Model):
     def __str__(self):
         return self.nombre
 
+import qrcode
+from io import BytesIO
+from django.core.files import File
+
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(default='Sin descripción')
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0)
-    codigo_barras = models.CharField(max_length=50, unique=True) 
+    codigo_barras = models.CharField(max_length=50, unique=True)
     proveedor = models.ForeignKey('Proveedor', on_delete=models.CASCADE, null=True, blank=True)
-
-    imagen = models.ImageField(upload_to='productos/', blank=True, null=True)  
+    imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
+    qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
 
     def __str__(self):
         return self.nombre
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
 
+        # Si no hay imagen y no se ha asignado aún
+        if not self.imagen:
+            default_path = os.path.join(settings.MEDIA_ROOT, 'productos/default.png')
+            with open(default_path, 'rb') as f:
+                self.imagen.save('default.png', File(f), save=False)
+
+        # Generar QR si no existe
+        if not self.qr_code:
+            qr_data = f'{self.codigo_barras}'
+            qr_img = qrcode.make(qr_data)
+            buffer = BytesIO()
+            qr_img.save(buffer, format='PNG')
+            file_name = f'qr_{self.codigo_barras}.png'
+            self.qr_code.save(file_name, File(buffer), save=False)
+
+        super().save(*args, **kwargs)
 
 
 # Modelo para almacenar los datos personales de los usuarios
@@ -125,3 +150,14 @@ class EgresoProducto(models.Model):
 
     def __str__(self):
         return f"Egreso de {self.cantidad} de {self.producto.nombre}"
+
+class CorteCaja(models.Model):
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
+    fecha_inicio = models.DateTimeField()
+    fecha_fin = models.DateTimeField()
+    total_ventas = models.DecimalField(max_digits=10, decimal_places=2)
+    total_por_metodo = models.JSONField(default=dict)
+    creado_en = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.usuario.username} - {self.fecha_inicio.strftime('%d/%m/%Y %H:%M')} → {self.fecha_fin.strftime('%H:%M')}"

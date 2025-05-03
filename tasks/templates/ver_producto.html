@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="card p-4 shadow-sm bg-white text-center">
+  <h2>Producto Registrado</h2>
+  <p><strong>Nombre:</strong> {{ producto.nombre }}</p>
+  <p><strong>Código de Barras:</strong> {{ producto.codigo_barras }}</p>
+  <p><strong>Precio:</strong> ${{ producto.precio }}</p>
+  <p><strong>Stock:</strong> {{ producto.stock }}</p>
+  <p><strong>QR generado:</strong></p>
+
+  {% if producto.qr_code %}
+    <img src="{{ producto.qr_code.url }}" width="200" alt="QR del producto">
+    <br>
+    <a href="{{ producto.qr_code.url }}" download class="btn btn-outline-primary mt-2">Descargar QR</a>
+  {% else %}
+    <p>No se generó QR.</p>
+  {% endif %}
+
+  <a href="{% url 'crear_producto' %}" class="btn btn-success mt-3">Registrar otro producto</a>
+</div>
+{% endblock %}

@@ -5,6 +5,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.conf import settings
 from django.conf.urls.static import static
+from tasks.views import buscar_producto
+
 
 
 urlpatterns = [
@@ -25,7 +27,8 @@ urlpatterns = [
     path('dashboard/delete_user/<int:user_id>/', views.delete_user, name='delete_user'),
 
     # Dashboard de Gerente
-    path('dashboard/gerente/', views.gerente_dashboard, name='gerente_dashboard'),
+   path('dashboard/gerente/', views.dashboard_gerente, name='gerente_dashboard'),
+
 
     # Dashboard de Cajero
     path('cajero/', views.cajero_dashboard, name='cajero_dashboard'),
@@ -33,9 +36,10 @@ urlpatterns = [
     # Gestión de Productos
     path('inventario/crear-producto/', views.crear_producto, name='crear_producto'),
     path('buscar_producto/<str:codigo>/', views.buscar_producto, name='buscar_producto'),
-    path('escanear/', views.escanear_view, name='escanear_producto'),
+    
     path('inventario/actualizar_stock/<int:producto_id>/', views.actualizar_stock, name='actualizar_stock'),
     path('dashboard/inventario/create_product/', views.crear_producto, name='create_product'),
+    path('dashboard/inventario/', views.dashboard_inventario, name='dashboard_inventario'),
 
     # Gestión de Proveedores
     path('dashboard/inventario/proveedor/nuevo/', views.crear_proveedor, name='crear_proveedor'),
@@ -55,6 +59,20 @@ urlpatterns = [
   
     path('ver_ticket/<str:folio>/', views.ver_ticket, name='ver_ticket'),
     path('historial_ventas/', views.historial_ventas, name='historial_ventas'),
+   
+   
+    path('ventas/eliminar/<str:folio>/', views.eliminar_venta, name='eliminar_venta'),
+    path('corte-caja/', views.corte_caja, name='corte_caja'),
+
+    path('inventario/create_product/', views.crear_producto, name='crear_producto'),
+    path('inventario/producto/<int:producto_id>/', views.ver_producto, name='ver_producto'),
+    path('producto/<int:producto_id>/', views.ver_producto, name='ver_producto'),
+    path('api/producto/<str:codigo>/', views.buscar_producto, name='buscar_producto'),
+
+    path('buscar-producto/<str:codigo>/', buscar_producto, name='buscar_producto'),
+
+
+
 
 
 

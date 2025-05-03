@@ -1,0 +1,64 @@
+:root {
+    --gris-claro: #f8f9fa;
+    --gris-hover: #f1f3f5;
+    --borde-suave: #dee2e6;
+    --texto: #495057;
+    --verde-suave: #d2f4d2;
+    --rojo-suave: #f8d7da;
+    --verde: #3d9970;
+    --rojo: #d9534f;
+  }
+
+  .card {
+    border-radius: 1rem;
+    border: 1px solid var(--borde-suave);
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+  }
+
+  .card .card-body {
+    padding: 1.5rem;
+  }
+
+  .card-title {
+    color: var(--texto);
+    font-weight: 500;
+  }
+
+  .card-text.display-6 {
+    font-weight: 600;
+    font-size: 2rem;
+  }
+
+  .text-success {
+    color: var(--verde);
+  }
+
+  .text-danger {
+    color: var(--rojo);
+  }
+
+  .card.border-success {
+    border-left: 8px solid var(--verde);
+    background-color: var(--verde-suave);
+  }
+
+  .card.border-danger {
+    border-left: 8px solid var(--rojo);
+    background-color: var(--rojo-suave);
+  }
+
+  table thead {
+    background-color: var(--gris-claro);
+    color: var(--texto);
+    font-weight: 500;
+  }
+
+  table tbody tr:hover {
+    background-color: var(--gris-hover);
+  }
+
+  h1 {
+    color: var(--texto);
+    font-weight: 600;
+  }

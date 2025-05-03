@@ -17,16 +17,34 @@ function insertarNumero(numero) {
       document.getElementById('cambio').innerText = `$${cambio.toFixed(2)}`;
     }
 
-    function buscarProductoManual() {
-      const codigo = document.getElementById('codigoManual').value;
+    async function buscarProductoManual() {
+      const codigo = document.getElementById('codigoManual').value.trim();
+    
       if (!codigo) {
-        alert('Por favor ingrese un código de barras');
+        alert('Por favor ingrese un código de barras.');
         return;
       }
-
-      // Lógica para buscar el producto por el código
-      alert('Buscando producto con código: ' + codigo);
+    
+      try {
+        const response = await fetch(`/buscar-producto/${codigo}/`);
+    
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert(errorData.error || 'Producto no encontrado.');
+          return;
+        }
+    
+        const producto = await response.json();
+        agregarProductoAlTicket(producto);
+        
+      } catch (error) {
+        console.error('Error al buscar producto:', error);
+        alert('Hubo un error al buscar el producto. Intenta de nuevo.');
+      } finally {
+        document.getElementById('codigoManual').value = '';
+      }
     }
+    
 
     function abrirEscaner() {
       document.getElementById('modalEscaner').style.display = 'flex';
