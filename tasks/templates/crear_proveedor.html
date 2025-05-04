@@ -1,38 +1,57 @@
 {% extends 'base.html' %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'tasks/css/crear_provedor.css' %}">
+
 {% block content %}
-<div class="container mt-4">
-    <h2 class="text-center mb-4" style="color: #343a40;">Agregar Nuevo Proveedor</h2>
+<div class="container mt-5" style="max-width: 600px;">
+  <div class="card shadow">
+    <div class="card-body">
+      <h4 class="text-center mb-4">➕ Agregar Nuevo Proveedor</h4>
 
-  <form method="POST" class="card p-4 shadow-sm bg-white mx-auto">
-    {% csrf_token %}
+      <form method="POST" novalidate>
+        {% csrf_token %}
 
-    <div class="mb-3">
-      <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label }}</label>
-      {{ form.nombre }}
+        <div class="mb-3">
+          <label for="{{ form.nombre.id_for_label }}" class="form-label">Nombre</label>
+          {{ form.nombre }}
+        </div>
+
+        <div class="mb-3">
+          <label for="{{ form.telefono.id_for_label }}" class="form-label">Teléfono</label>
+          {{ form.telefono }}
+        </div>
+
+        <div class="mb-3">
+          <label for="{{ form.correo.id_for_label }}" class="form-label">Correo electrónico</label>
+          {{ form.correo }}
+        </div>
+
+        <div class="mb-3">
+          <label for="{{ form.direccion.id_for_label }}" class="form-label">Dirección</label>
+          {{ form.direccion }}
+        </div>
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            {% for field in form %}
+              {% for error in field.errors %}
+                <li>{{ field.label }}: {{ error }}</li>
+              {% endfor %}
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        <div class="d-flex justify-content-center mt-4 gap-2">
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-save"></i> Guardar
+          </button>
+          <a href="{% url 'lista_proveedores' %}" class="btn btn-secondary">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </a>
+        </div>
+      </form>
     </div>
-
-    <div class="mb-3">
-      <label for="{{ form.telefono.id_for_label }}" class="form-label">{{ form.telefono.label }}</label>
-      {{ form.telefono }}
-    </div>
-
-    <div class="mb-3">
-      <label for="{{ form.correo.id_for_label }}" class="form-label">{{ form.correo.label }}</label>
-      {{ form.correo }}
-    </div>
-
-    <div class="mb-3">
-      <label for="{{ form.direccion.id_for_label }}" class="form-label">{{ form.direccion.label }}</label>
-      {{ form.direccion }}
-    </div>
-
-    <div class="text-center mt-3">
-      <button type="submit" class="btn btn-success px-4 py-2 rounded-2">Guardar</button>
-      <a href="{% url 'lista_proveedores' %}" class="btn btn-secondary px-4 py-2 rounded-2 ms-2">Cancelar</a>
-    </div>
-  </form>
+  </div>
 </div>
-
 {% endblock %}

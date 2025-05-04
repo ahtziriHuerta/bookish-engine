@@ -3,6 +3,10 @@ let ticket = [];
 
 // ========== ESCÁNER ==========
 function abrirEscaner() {
+  console.log("🟡 Intentando iniciar Quagga...");
+  const contenedor = document.querySelector('#scanner-container');
+  console.log("📦 Contenedor:", contenedor);
+
   document.getElementById("modalEscaner").style.display = "block";
 
   Quagga.init({
@@ -12,33 +16,67 @@ function abrirEscaner() {
       target: document.querySelector('#scanner-container'),
       constraints: { facingMode: "environment" }
     },
-    decoder: { readers: ["code_128_reader", "code_39_reader"] }
+    decoder: {
+      readers: ["ean_reader", "code_128_reader", "code_39_reader", "ean_8_reader"]
+    },
+    locator: {
+      patchSize: "medium",
+      halfSample: true
+    },
+    numOfWorkers: 2,
+    frequency: 10
   }, err => {
     if (err) {
-      console.error(err);
+      console.error("❌ Error al iniciar Quagga:", err);
       alert("No se pudo iniciar el escáner.");
       return;
     }
+
     Quagga.start();
+    console.log("✅ Quagga iniciado correctamente.");
   });
 
+  // Mostrar cada fotograma procesado
+  Quagga.onProcessed(() => {
+    console.log("📸 Fotograma procesado...");
+  });
+
+  // Manejo de código detectado
   Quagga.onDetected(data => {
-    const codigo = data.codeResult.code;
-    Quagga.offDetected();
+    const codigo = data?.codeResult?.code;
+    if (!codigo) {
+      console.warn("⚠️ No se detectó un código válido.");
+      return;
+    }
+
+    console.log("📦 Código detectado por Quagga:", codigo);
+
+    Quagga.offDetected(); // Detener detección para evitar repeticiones
     Quagga.stop();
     cerrarEscaner();
 
+    // Buscar producto
     fetch(`/buscar_producto/${codigo}/`)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
       .then(producto => {
+        console.log("🔍 Respuesta del backend:", producto);
         if (!producto.error) {
+          alert(`✅ Producto encontrado: ${producto.nombre}`);
           agregarProductoAlTicket(producto);
         } else {
-          alert("Producto no encontrado.");
+          alert(`❌ Código no encontrado: ${codigo}`);
         }
+      })
+      .catch(err => {
+        console.error("❌ Error al buscar el producto:", err);
+        alert(`Error al buscar el producto con código: ${codigo}`);
       });
   });
 }
+
 
 function cerrarEscaner() {
   document.getElementById("modalEscaner").style.display = "none";
@@ -56,6 +94,7 @@ function buscarProductoManual() {
       if (!producto.error) {
         agregarProductoAlTicket(producto);
         document.getElementById("codigoManual").value = "";
+        alert("Producto agregado.");
       } else {
         alert("Producto no encontrado.");
       }

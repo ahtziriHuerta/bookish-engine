@@ -58,39 +58,36 @@ class Proveedor(models.Model):
 import qrcode
 from io import BytesIO
 from django.core.files import File
+from django.core.validators import RegexValidator
 
+codigo_barras_validator = RegexValidator(
+    regex=r'^\d{8,13}$',  # Solo números, entre 8 y 13 dígitos
+    message='El código de barras debe contener solo números y tener entre 8 y 13 dígitos.'
+)
 class Producto(models.Model):
     nombre = models.CharField(max_length=100)
     descripcion = models.TextField(default='Sin descripción')
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField(default=0)
-    codigo_barras = models.CharField(max_length=50, unique=True)
+    codigo_barras = models.CharField(
+        max_length=13,
+        unique=True,
+        validators=[codigo_barras_validator]
+    )
     proveedor = models.ForeignKey('Proveedor', on_delete=models.CASCADE, null=True, blank=True)
     imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
-    qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
 
     def __str__(self):
         return self.nombre
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-
-        # Si no hay imagen y no se ha asignado aún
         if not self.imagen:
             default_path = os.path.join(settings.MEDIA_ROOT, 'productos/default.png')
             with open(default_path, 'rb') as f:
                 self.imagen.save('default.png', File(f), save=False)
-
-        # Generar QR si no existe
-        if not self.qr_code:
-            qr_data = f'{self.codigo_barras}'
-            qr_img = qrcode.make(qr_data)
-            buffer = BytesIO()
-            qr_img.save(buffer, format='PNG')
-            file_name = f'qr_{self.codigo_barras}.png'
-            self.qr_code.save(file_name, File(buffer), save=False)
-
         super().save(*args, **kwargs)
+
 
 
 # Modelo para almacenar los datos personales de los usuarios

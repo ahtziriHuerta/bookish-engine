@@ -1,23 +1,29 @@
 {% extends 'base.html' %}
-{% load static %}
 
 {% block content %}
-<div class="card p-4 shadow-sm bg-white text-center">
-  <h2>Producto Registrado</h2>
-  <p><strong>Nombre:</strong> {{ producto.nombre }}</p>
-  <p><strong>Código de Barras:</strong> {{ producto.codigo_barras }}</p>
-  <p><strong>Precio:</strong> ${{ producto.precio }}</p>
-  <p><strong>Stock:</strong> {{ producto.stock }}</p>
-  <p><strong>QR generado:</strong></p>
+<div class="container mt-5">
+  <div class="card shadow p-4">
+    <h4 class="text-center mb-4">🔍 Detalles del Producto</h4>
 
-  {% if producto.qr_code %}
-    <img src="{{ producto.qr_code.url }}" width="200" alt="QR del producto">
-    <br>
-    <a href="{{ producto.qr_code.url }}" download class="btn btn-outline-primary mt-2">Descargar QR</a>
-  {% else %}
-    <p>No se generó QR.</p>
-  {% endif %}
+    <ul class="list-group">
+      <li class="list-group-item"><strong>Nombre:</strong> {{ producto.nombre }}</li>
+      <li class="list-group-item"><strong>Descripción:</strong> {{ producto.descripcion }}</li>
+      <li class="list-group-item"><strong>Precio:</strong> ${{ producto.precio }}</li>
+      <li class="list-group-item"><strong>Stock:</strong> {{ producto.stock }}</li>
+      <li class="list-group-item"><strong>Código de barras:</strong> {{ producto.codigo_barras }}</li>
+      <li class="list-group-item"><strong>Proveedor:</strong> {{ producto.proveedor }}</li>
+      {% if producto.imagen %}
+      <li class="list-group-item">
+        <strong>Imagen:</strong><br>
+        <img src="{{ producto.imagen.url }}" class="img-fluid mt-2" alt="Imagen del producto" style="max-width: 200px;">
+      </li>
+      {% endif %}
+    </ul>
 
-  <a href="{% url 'crear_producto' %}" class="btn btn-success mt-3">Registrar otro producto</a>
+    <div class="text-center mt-4">
+      <a href="{% url 'editar_producto' producto.id %}" class="btn btn-primary">Editar</a>
+      <a href="{% url 'lista_productos' %}" class="btn btn-secondary">Volver a la lista</a>
+    </div>
+  </div>
 </div>
 {% endblock %}

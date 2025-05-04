@@ -1,58 +1,75 @@
 {% extends 'base.html' %}
 {% load static %}
-<link rel="stylesheet" href="{% static 'tasks/css/create_product.css' %}">
-{% load static %}
-
 {% block content %}
-<h2 class="text-center mb-4" style="color: #343a40;">Registrar Nuevo Producto</h2>
 
-<form method="POST" enctype="multipart/form-data" class="card p-4 shadow-sm bg-white">
-  {% csrf_token %}
-  <div class="mb-3">
-    <label for="{{ form.nombre.id_for_label }}" class="form-label">{{ form.nombre.label }}</label>
-    {{ form.nombre }}
+<div class="container mt-5" style="max-width: 700px;">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="text-center mb-4" style="color: #343a40;">Crear Producto</h3>
+
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          <label class="form-label">Nombre</label>
+          {{ form.nombre }}
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Precio</label>
+            {{ form.precio }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Stock</label>
+            {{ form.stock }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Descripción</label>
+          {{ form.descripcion }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Proveedor</label>
+          {{ form.proveedor }}
+        </div>
+
+        
+
+        <div class="mb-3">
+          <label class="form-label">Código de barras</label>
+          {{ form.codigo_barras }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Imagen</label>
+          {{ form.imagen }}
+        </div>
+
+        {% if form.errors %}
+          <div class="alert alert-danger">
+            <ul>
+              {% for field in form %}
+                {% for error in field.errors %}
+                  <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+              {% endfor %}
+              {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
+        <div class="text-center">
+          <button type="submit" class="btn btn-success px-4">Guardar</button>
+          <a href="{% url 'dashboard_inventario' %}" class="btn btn-secondary ms-2 px-4">Cancelar</a>
+        </div>
+      </form>
+    </div>
   </div>
-  <div class="mb-3">
-    <label for="{{ form.precio.id_for_label }}" class="form-label">{{ form.precio.label }}</label>
-    {{ form.precio }}
-  </div>
-  <div class="mb-3">
-    <label for="{{ form.descripcion.id_for_label }}" class="form-label">{{ form.descripcion.label }}</label>
-    {{ form.descripcion }}
-  </div>
-  <div class="mb-3">
-    <label for="{{ form.imagen.id_for_label }}" class="form-label">{{ form.imagen.label }}</label>
-    {{ form.imagen }}
-  </div>
-  <div class="mb-3">
-    <label for="{{ form.stock.id_for_label }}" class="form-label">{{ form.stock.label }}</label>
-    {{ form.stock }}
-  </div>
-  <div class="mb-3">
-      <label for="{{ form.proveedor.id_for_label }}" class="form-label">{{ form.proveedor.label }}</label>
-    {{ form.proveedor }}
-  </div>
-  <div class="mb-3">
-    <label for="{{ form.codigo_barras.id_for_label }}" class="form-label">{{ form.codigo_barras.label }}</label>
-    {{ form.codigo_barras }}
-  </div>
-  {% if form.errors %}
-  <div class="alert alert-danger">
-    <ul>
-      {% for field in form %}
-        {% for error in field.errors %}
-          <li>{{ field.label }}: {{ error }}</li>
-        {% endfor %}
-      {% endfor %}
-      {% for error in form.non_field_errors %}
-        <li>{{ error }}</li>
-      {% endfor %}
-    </ul>
-  </div>
-{% endif %}
- 
-  <div class="text-center">
-    <button type="submit" class="btn btn-success px-4 py-2 rounded-2"> Guardar</button>
-  </div>
-</form>
+</div>
+
 {% endblock %}

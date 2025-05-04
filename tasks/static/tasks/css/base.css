@@ -1,112 +1,41 @@
-/* =========================
-   Estilos generales
-   ========================= */
-   body {
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #F5F5DC, #D2B48C);
-    margin: 0;
-    padding: 0;
-  }
-  
-  /* =========================
-     Contenedor
-     ========================= */
-  .container {
-    max-width: 900px;
-    margin: auto;
-    padding: 0 1rem;
-  }
-  
-  /* =========================
-     Navbar
-     ========================= */
-  .navbar {
-    background-color: #343a40;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    border-radius: 0 0 8px 8px;
-    padding: 5px 0;
-  }
-  
-  .navbar-brand {
-    color: #fff;
-    font-size: 1.6rem;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-  }
-  
-  #logo-img {
-    height: 40px;
-    margin-right: 10px;
-  }
-  
-  /* Solución para enlaces en múltiples líneas */
-  .navbar-nav {
-    flex-direction: row !important;
-    align-items: center;
-    flex-wrap: nowrap;
-    white-space: nowrap;
-    overflow-x: auto;
-  }
-  
-  .navbar-nav .nav-item {
-    margin: 0 8px;
-  }
-  
-  .navbar-nav .nav-link {
-    color: #fff;
-    font-size: 14px;
-    white-space: nowrap;
-    transition: background-color 0.2s ease;
-    padding: 6px 10px;
-  }
-  
-  .navbar-nav .nav-link:hover {
-    background-color: #495057;
-    border-radius: 4px;
-  }
-  
-  /* Botón de cerrar sesión en rojo */
-  .text-danger {
-    color: #d9534f !important;
-  }
-  
-  /* =========================
-     Elementos comunes
-     ========================= */
-  .card {
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .table {
-    border-radius: 10px;
-    overflow: hidden;
-  }
-  
-  .alert {
-    font-weight: bold;
-  }
-  
-  .btn {
-    font-size: 16px;
-  }
-  
-  /* =========================
-     Responsive ajustes
-     ========================= */
-  @media (max-width: 768px) {
-    .navbar-nav {
-      overflow-x: auto;
-      justify-content: start;
-    }
-  
-    #logo-img {
-      height: 32px;
-    }
-  
-    .navbar-brand {
-      font-size: 1.2rem;
-    }
-  }
-  
+/* Estilo general del cuerpo */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+}
+
+/* Estilo del contenedor principal */
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+/* Estilo para las tarjetas */
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para los mensajes de alerta */
+.alert {
+  font-weight: bold;
+}
+
+/* Estilo para la tabla */
+.table {
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Botones personalizados */
+.btn {
+  font-size: 16px;
+}
+/* base.css */
+.navbar {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.navbar-brand {
+  font-size: 1.8rem;
+  font-weight: bold;
+}

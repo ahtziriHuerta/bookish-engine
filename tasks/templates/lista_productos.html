@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h1 class="mb-4">📦 Lista de Productos</h1>
+
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>Nombre</th>
+        <th>Precio</th>
+        <th>Stock</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in productos %}
+      <tr>
+        <td>{{ p.nombre }}</td>
+        <td>${{ p.precio }}</td>
+        <td>{{ p.stock }}</td>
+        <td>
+        
+          <a href="{% url 'editar_producto' p.id %}" class="btn btn-sm btn-warning">Editar</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" class="text-center">No hay productos registrados.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -36,7 +36,7 @@ urlpatterns = [
     # Gestión de Productos
     path('inventario/crear-producto/', views.crear_producto, name='crear_producto'),
     path('buscar_producto/<str:codigo>/', views.buscar_producto, name='buscar_producto'),
-    
+    path('escanear/', views.escanear_view, name='escanear_producto'),
     path('inventario/actualizar_stock/<int:producto_id>/', views.actualizar_stock, name='actualizar_stock'),
     path('dashboard/inventario/create_product/', views.crear_producto, name='create_product'),
     path('dashboard/inventario/', views.dashboard_inventario, name='dashboard_inventario'),
@@ -70,7 +70,10 @@ urlpatterns = [
     path('api/producto/<str:codigo>/', views.buscar_producto, name='buscar_producto'),
 
     path('buscar-producto/<str:codigo>/', buscar_producto, name='buscar_producto'),
+    path('productos/', views.lista_productos, name='lista_productos'),
+    path('producto/editar/<int:producto_id>/', views.editar_producto, name='editar_producto'),
 
+   
 
 
 
