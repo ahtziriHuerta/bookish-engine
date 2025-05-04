@@ -6,6 +6,8 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.conf.urls.static import static
 from tasks.views import buscar_producto
+from tasks.views import validar_pin
+
 
 
 
@@ -77,6 +79,8 @@ urlpatterns = [
 
     # Vista de acceso no autorizado
     path('no-autorizado/', views.no_autorizado, name='no_autorizado'),
+    path('validar-pin/', validar_pin, name='validar_pin'),
+    
 ]
 
 # Archivos estáticos y multimedia (solo en desarrollo)

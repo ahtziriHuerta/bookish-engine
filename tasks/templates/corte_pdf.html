@@ -1,20 +1,41 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Reporte de Corte de Caja</title>
   <style>
+    @page { margin: 1.5cm; }
     body { font-family: Arial, sans-serif; }
-    h1 { text-align: center; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-    th { background-color: #f2f2f2; }
+    h1, h2 { text-align: center; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      table-layout: fixed;
+      word-wrap: break-word;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
   </style>
 </head>
 <body>
+  <div style="text-align:center;">
+    <img src="{{ request.scheme }}://{{ request.get_host }}{% static 'tasks/img/logo.png' %}" height="60" alt="Logo">
+ 
+    <p><strong>Tienda Corozo</strong><br>Zapopan, Jalisco</p>
+  </div>
+
   <h1>Corte de Caja</h1>
   <p><strong>Desde:</strong> {{ fecha_inicio }} <strong>Hasta:</strong> {{ fecha_fin }}</p>
-  <p><strong>Total Ventas:</strong> ${{ total_ventas }}</p>
+  <p><strong>Total Ventas:</strong> ${{ total_ventas|floatformat:2 }}</p>
 
   <h2>Resumen por Método de Pago</h2>
   <table>
@@ -33,16 +54,50 @@
       {% endfor %}
     </tbody>
   </table>
+
+  {% if ventas_resumen %}
+  <h2>Desglose de Ventas</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Folio</th>
+        <th>Fecha</th>
+        <th>Método</th>
+        <th>Total</th>
+        <th>Descuento</th>
+        <th>Autorizado por</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for v in ventas_resumen %}
+      <tr>
+        <td>{{ v.folio }}</td>
+        <td>{{ v.fecha|date:"d/m/Y H:i" }}</td>
+        <td>{{ v.metodo_pago }}</td>
+        <td>${{ v.total|floatformat:2 }}</td>
+        <td>${{ v.descuento|floatformat:2 }}</td>
+        <td>{% if v.autorizado_por %}{{ v.autorizado_por.username }}{% else %}N/A{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <th colspan="3">Total general:</th>
+        <th>${{ total_ventas|floatformat:2 }}</th>
+        <th colspan="2"></th>
+      </tr>
+    </tfoot>
+  </table>
+
+  <p><strong>Total en Descuentos:</strong> ${{ total_descuentos|floatformat:2 }}</p>
+  {% endif %}
+
+  {% if not request.GET.pdf %}
   <div style="text-align: center; margin-top: 30px;">
     <button onclick="window.history.back()" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px;">
       ⬅️ Regresar
     </button>
   </div>
+  {% endif %}
 </body>
-<script>
-  window.onload = function() {
-    window.print();
-  };
-</script>
-
 </html>

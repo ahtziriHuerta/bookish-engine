@@ -9,6 +9,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.messages import get_messages
 from django.template.loader import get_template
 from .decorators import roles_permitidos  
+from decimal import Decimal
+from tasks.models import PinGerente, Usuario
+from io import BytesIO
+
+
+
+
 
 # Decoradores personalizados
 from .decorators import roles_permitidos
@@ -33,12 +40,15 @@ import tempfile
 from django.core.mail import EmailMessage
 import io
 import json
-from weasyprint import HTML
+from weasyprint import HTML # type: ignore
 from django.template.loader import render_to_string
 
 # Fechas y utilidades
 from django.utils import timezone
 from django.utils.timezone import now, make_aware
+
+# Configuración de Django
+from django.conf import settings
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncDate
 from calendar import monthrange
@@ -424,35 +434,52 @@ def registrar_venta(request):
             data = json.loads(request.body)
             items = data.get('items', [])
             metodo_pago = data.get('metodo_pago')
+            descuento = Decimal(data.get('descuento', 0))
+            autorizado_id = data.get('autorizado_por')  # ID del gerente que autorizó
 
             if not items:
                 return JsonResponse({'success': False, 'error': 'No hay productos en el ticket'}, status=400)
 
-            total_calculado = 0
-            detalles_a_guardar = []
+            total_calculado = Decimal('0.00')
 
+            # Validar stock
             for item in items:
                 producto = Producto.objects.get(id=item['id'])
                 cantidad = int(item['qty'])
-
                 if producto.stock < cantidad:
                     return JsonResponse({
                         'success': False,
                         'error': f"Stock insuficiente para '{producto.nombre}'. Disponible: {producto.stock}, solicitado: {cantidad}"
                     }, status=400)
 
-           
+            # Validar si el descuento está autorizado
+            autorizado_por = None
+            if descuento > 0:
+                if autorizado_id:
+                    try:
+                        gerente = User.objects.get(id=autorizado_id)
+                        if gerente.usuario.rol.nombre_rol != 'Gerente':
+                            return JsonResponse({'success': False, 'error': 'El usuario autorizado no es un gerente'}, status=403)
+                        autorizado_por = gerente
+                    except User.DoesNotExist:
+                        return JsonResponse({'success': False, 'error': 'El usuario autorizado no existe'}, status=404)
+                else:
+                    return JsonResponse({'success': False, 'error': 'Se requiere autorización de un gerente para aplicar descuento'}, status=403)
+
+            # Crear la venta
             venta = Venta.objects.create(
                 usuario=request.user,
-                total=0,
-                metodo_pago=metodo_pago
+                total=0,  # temporal
+                metodo_pago=metodo_pago,
+                descuento=descuento,
+                autorizado_por=autorizado_por
             )
 
+            # Crear los detalles
             for item in items:
                 producto = Producto.objects.get(id=item['id'])
                 cantidad = int(item['qty'])
-                precio = float(item['price'])
-
+                precio = Decimal(str(item['price']))
                 subtotal = cantidad * precio
                 total_calculado += subtotal
 
@@ -466,12 +493,8 @@ def registrar_venta(request):
                 producto.stock -= cantidad
                 producto.save()
 
-                print(f"✅ Agregado: {producto.nombre} x{cantidad} - ${precio}")
-                print(f"📦 Nuevo stock de {producto.nombre}: {producto.stock}")
-
-            venta.total = total_calculado
+            venta.total = total_calculado - descuento
             venta.save()
-            venta.refresh_from_db()
 
             return JsonResponse({
                 'success': True,
@@ -485,7 +508,6 @@ def registrar_venta(request):
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
     return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)
-
 
 
 @roles_permitidos(['Administrador', 'Cajero', 'Ventas', 'Gerente'])
@@ -632,6 +654,7 @@ def corte_caja(request):
     # Ventas del periodo
     ventas = Venta.objects.filter(usuario=usuario, fecha__range=(fecha_inicio, fecha_fin))
     total_ventas = ventas.aggregate(Sum('total'))['total__sum'] or 0
+    total_descuentos = ventas.aggregate(Sum('descuento'))['descuento__sum'] or 0
     ventas_resumen = ventas.order_by('fecha')
 
     total_por_metodo = list(
@@ -642,18 +665,17 @@ def corte_caja(request):
 
     # Acción: generar PDF solo
     if request.GET.get('pdf') == '1':
-        return generar_pdf(request, ventas_resumen, total_ventas, total_por_metodo, fecha_inicio, fecha_fin)
+        return generar_pdf(request, ventas_resumen, total_ventas, total_por_metodo, fecha_inicio, fecha_fin, total_descuentos)
 
     # Acción: enviar PDF por correo solo
     if request.GET.get('enviar') == '1':
-        enviado = enviar_pdf(request, ventas_resumen, total_ventas, total_por_metodo, fecha_inicio, fecha_fin)
+        enviado = enviar_pdf(request, ventas_resumen, total_ventas, total_por_metodo, fecha_inicio, fecha_fin, total_descuentos)
         if enviado:
             messages.success(request, "Corte enviado al gerente.")
         return redirect('corte_caja')
 
-  
+    # Acción: guardar corte de caja
     if request.method == 'POST':
-        # 1. Guardar el corte
         CorteCaja.objects.create(
             usuario=usuario,
             fecha_inicio=fecha_inicio,
@@ -662,14 +684,17 @@ def corte_caja(request):
             total_por_metodo=total_por_metodo
         )
 
-        # 2. Enviar correo
-        enviar_pdf(request, ventas_resumen, total_ventas, total_por_metodo, fecha_inicio, fecha_fin)
+        enviado = enviar_pdf(request, ventas_resumen, total_ventas, total_por_metodo, fecha_inicio, fecha_fin, total_descuentos)
+        if enviado:
+            messages.success(request, "✅ Corte enviado por correo al gerente.")
+        else:
+            messages.error(request, "❌ No se pudo enviar el correo del corte.")
 
-        # 3. Renderizar HTML imprimible
         html_string = render_to_string('corte_pdf.html', {
             'ventas_resumen': ventas_resumen,
             'total_ventas': total_ventas,
             'total_por_metodo': total_por_metodo,
+            'total_descuentos': total_descuentos,
             'fecha_inicio': fecha_inicio,
             'fecha_fin': fecha_fin,
             'request': request
@@ -680,17 +705,19 @@ def corte_caja(request):
         'ventas_resumen': ventas_resumen,
         'total_ventas': total_ventas,
         'total_por_metodo': total_por_metodo,
+        'total_descuentos': total_descuentos,
         'fecha_inicio': fecha_inicio,
         'fecha_fin': fecha_fin
     })
 
             
-@roles_permitidos(['Administrador', 'Gerente','cajero', 'Ventas'])         
-def generar_pdf(request, ventas, total, metodo, inicio, fin):
+@roles_permitidos(['Administrador', 'Gerente', 'Cajero', 'Ventas'])
+def generar_pdf(request, ventas, total, metodo, inicio, fin, total_descuentos):
     html_string = render_to_string('corte_pdf.html', {
         'ventas_resumen': ventas,
         'total_ventas': total,
         'total_por_metodo': metodo,
+        'total_descuentos': total_descuentos,
         'fecha_inicio': inicio,
         'fecha_fin': fin,
         'request': request
@@ -699,26 +726,42 @@ def generar_pdf(request, ventas, total, metodo, inicio, fin):
     return HttpResponse(pdf_file, content_type='application/pdf')
 
 
-@roles_permitidos(['Administrador', 'Gerente','cajero', 'Ventas'])  
-def enviar_pdf(request, ventas, total, metodo, inicio, fin):
+
+def enviar_pdf(request, ventas, total, metodo, inicio, fin, total_descuentos):
+    # Renderizar HTML del PDF
     html_string = render_to_string('corte_pdf.html', {
         'ventas_resumen': ventas,
         'total_ventas': total,
         'total_por_metodo': metodo,
+        'total_descuentos': total_descuentos,
         'fecha_inicio': inicio,
         'fecha_fin': fin,
         'request': request
     })
-    pdf_file = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
-    email = EmailMessage(
-        '📋 Corte de Caja',
-        'Adjunto el corte realizado.',
-        to=['gerente@tiendacorozo.com']
-    )
-    email.attach('corte_caja.pdf', pdf_file, 'application/pdf')
-    email.send()
-    return True
 
+    # Generar PDF en memoria
+    pdf_file = BytesIO()
+    HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf(pdf_file)
+    pdf_file.seek(0)
+
+    # Crear correo
+    subject = f"Corte de Caja | {request.user.username} | {inicio.strftime('%d/%m/%Y %H:%M')} - {fin.strftime('%d/%m/%Y %H:%M')}"
+    message = "Adjunto se encuentra el corte de caja generado automáticamente desde el sistema de punto de venta."
+    email = EmailMessage(
+        subject,
+        message,
+        'sistema@tiendacorozo.com',  # Cambia por tu correo remitente real
+        ['gerente@tiendacorozo.com']  # Cambia por el destinatario real
+    )
+
+    email.attach('corte_caja.pdf', pdf_file.getvalue(), 'application/pdf')
+
+    try:
+        email.send()
+        return True
+    except Exception as e:
+        print("❌ Error al enviar correo:", e)
+        return False
 
 @login_required
 @roles_permitidos(['Cajero', 'Ventas', 'Administrador', 'Gerente'])
@@ -759,3 +802,16 @@ def editar_producto(request, producto_id):
 def lista_productos(request):
     productos = Producto.objects.all()
     return render(request, 'lista_productos.html', {'productos': productos})
+
+@csrf_exempt
+def validar_pin(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        pin = data.get('pin')
+
+        if PinGerente.objects.filter(pin=pin).exists():
+            return JsonResponse({'success': True})
+
+        return JsonResponse({'success': False, 'error': 'PIN incorrecto'}, status=403)
+
+    return JsonResponse({'success': False, 'error': 'Método no permitido'}, status=405)

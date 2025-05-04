@@ -1,16 +1,27 @@
 {% extends 'base.html' %}
+{% load custom_tags %}
 {% block title %}Ticket de Venta{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-  <h2>🧾 Ticket de Venta</h2>
+  <h2 style="text-align: center;">🧾 <strong>Tienda Corozo</strong></h2>
+  <h4 style="text-align: center;">Ticket de Venta</h4>
   <hr>
-  <p><strong>Folio:</strong> {{ venta.folio }}</p>
-  <p><strong>Fecha:</strong> {{ venta.fecha|date:"d/m/Y H:i" }}</p>
-  <p><strong>Usuario:</strong> {{ venta.usuario.username }}</p>
 
-  <table class="table table-bordered mt-3">
-    <thead class="table-dark">
+  <div class="row mt-3">
+    <div class="col-md-6">
+      <p><strong>Folio:</strong> {{ venta.folio }}</p>
+      <p><strong>Fecha:</strong> {{ venta.fecha|date:"d/m/Y H:i" }}</p>
+    </div>
+    <div class="col-md-6">
+      <p><strong>Cajero:</strong> {{ venta.usuario.username }}</p>
+      <p><strong>Método de Pago:</strong> {{ venta.metodo_pago }}</p>
+    </div>
+  </div>
+
+  <h5 class="mt-4">Detalle de Productos</h5>
+  <table class="table table-sm table-bordered mt-2">
+    <thead>
       <tr>
         <th>Producto</th>
         <th>Cantidad</th>
@@ -19,19 +30,48 @@
       </tr>
     </thead>
     <tbody>
-      {% for detalle in detalles %}
+      {% for d in venta.detalleventa_set.all %}
       <tr>
-        <td>{{ detalle.producto.nombre }}</td>
-        <td>{{ detalle.cantidad }}</td>
-        <td>${{ detalle.precio_unitario|floatformat:2 }}</td>
-        <td>${{ detalle.subtotal|floatformat:2 }}</td>
+        <td>{{ d.producto.nombre }}</td>
+        <td>{{ d.cantidad }}</td>
+        <td>${{ d.precio_unitario|floatformat:2 }}</td>
+        <td>${{ d.cantidad|multiply:d.precio_unitario|floatformat:2 }}</td>
+
+
       </tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <h4 class="mt-3">Total: ${{ venta.total|floatformat:2 }}</h4>
+  <div class="mt-4">
+    <p><strong>Descuento aplicado:</strong> ${{ venta.descuento|floatformat:2 }}</p>
+    <p><strong>Total a pagar:</strong> ${{ venta.total|floatformat:2 }}</p>
+    <p><strong>Autorizado por:</strong>
+      {% if venta.autorizado_por %}
+        {{ venta.autorizado_por.username }}
+      {% else %}
+        No aplica
+      {% endif %}
+    </p>
+  </div>
 
-  <button class="btn btn-dark mt-3" onclick="window.print()">🖨️ Imprimir Ticket</button>
+  <hr>
+  <p style="text-align:center;">¡Gracias por su compra!</p>
+
+  <div class="text-center mt-4">
+    <button class="btn btn-dark" onclick="window.print()">🖨️ Imprimir Ticket</button>
+    <a href="{% url 'corte_caja' %}" class="btn btn-secondary">⬅️ Regresar</a>
+  </div>
 </div>
+
+{% if request.GET.print == '1' %}
+<script>
+  window.onload = function() {
+    window.print();
+    setTimeout(() => {
+      window.close();
+    }, 1000); // espera 1 segundo antes de cerrar
+  };
+</script>
+{% endif %}
 {% endblock %}

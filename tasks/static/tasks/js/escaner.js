@@ -121,6 +121,7 @@ function agregarProductoAlTicket(producto) {
       let nuevaCantidad = cantidadActual + 1;
       let subtotal = (nuevaCantidad * parseFloat(item.dataset.price)).toFixed(2);
       item.dataset.cantidad = nuevaCantidad;
+      item.dataset.subtotal = subtotal;
       item.querySelector(".texto-producto").innerHTML =
         `${producto.nombre}<br><small>Cantidad: ${nuevaCantidad} | Subtotal: $${subtotal}</small>`;
 
@@ -137,14 +138,17 @@ function agregarProductoAlTicket(producto) {
       return;
     }
 
+    const subtotal = parseFloat(producto.precio).toFixed(2);
+
     const li = document.createElement("li");
     li.dataset.name = producto.nombre;
     li.dataset.price = producto.precio;
     li.dataset.cantidad = 1;
+    li.dataset.subtotal = subtotal;
     li.dataset.id = producto.id;
     li.innerHTML = `
       <div class="texto-producto">
-        ${producto.nombre}<br><small>Cantidad: 1 | Subtotal: $${parseFloat(producto.precio).toFixed(2)}</small>
+        ${producto.nombre}<br><small>Cantidad: 1 | Subtotal: $${subtotal}</small>
       </div>
       <button class="eliminar-btn">–</button>
     `;
@@ -155,13 +159,14 @@ function agregarProductoAlTicket(producto) {
         ticket = ticket.filter(p => p.id != producto.id);
       } else {
         li.dataset.cantidad = cantidad;
-        let subtotal = (cantidad * parseFloat(li.dataset.price)).toFixed(2);
+        const nuevoSubtotal = (cantidad * parseFloat(li.dataset.price)).toFixed(2);
+        li.dataset.subtotal = nuevoSubtotal;
         li.querySelector(".texto-producto").innerHTML =
-          `${li.dataset.name}<br><small>Cantidad: ${cantidad} | Subtotal: $${subtotal}</small>`;
+          `${li.dataset.name}<br><small>Cantidad: ${cantidad} | Subtotal: $${nuevoSubtotal}</small>`;
         const prod = ticket.find(p => p.id == producto.id);
         if (prod) prod.qty = cantidad;
       }
-      actualizarTotal();
+      calcularTotal();
     });
 
     lista.appendChild(li);
@@ -174,17 +179,28 @@ function agregarProductoAlTicket(producto) {
     });
   }
 
-  actualizarTotal();
+  calcularTotal();
 }
 
-function actualizarTotal() {
-  const totalSpan = document.getElementById("total");
+function calcularTotal() {
   let total = 0;
-  document.querySelectorAll("#ticket-list li").forEach(item => {
-    total += parseFloat(item.dataset.price) * parseInt(item.dataset.cantidad);
+  const items = document.querySelectorAll('#ticket-list li');
+
+  items.forEach(item => {
+    const subtotal = parseFloat(item.getAttribute('data-subtotal')) || 0;
+    total += subtotal;
   });
-  totalSpan.textContent = `$${total.toFixed(2)}`;
+
+  const descuento = descuentoAutorizado || 0;
+  const totalConDescuento = total - descuento;
+
+  document.getElementById('total').textContent = `$${totalConDescuento.toFixed(2)}`;
+  document.getElementById('discount').textContent = `$${descuento.toFixed(2)}`;
+
+  // 🔧 Asegura que se actualice el cambio
+  calcularCambio();
 }
+
 
 // ========== TICKET IMPRESO ==========
 function generarTicketImprimible(folio = "Sin folio", fecha = "", metodoPago = "") {
@@ -357,15 +373,6 @@ function borrarTodo() {
   calcularCambio();
 }
 
-function calcularCambio() {
-  const efectivo = parseFloat(document.getElementById("efectivo").value);
-  const total = parseFloat(document.getElementById("total").textContent.replace('$', ''));
-  let cambio = 0;
-  if (!isNaN(efectivo) && efectivo >= total) {
-    cambio = (efectivo - total).toFixed(2);
-  }
-  document.getElementById("cambio").textContent = `$${cambio}`;
-}
 
 // ========== EVENTOS ==========
 document.addEventListener("DOMContentLoaded", () => {
@@ -390,3 +397,74 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+
+
+// ========== descuento ==========
+
+let descuentoAutorizado = 0;
+
+function abrirModalDescuento() {
+  const descuentoSolicitado = parseFloat(document.getElementById('descuentoInput').value);
+  if (isNaN(descuentoSolicitado) || descuentoSolicitado <= 0) {
+    Swal.fire('⚠️ Descuento inválido', 'Ingresa un valor mayor a 0.', 'warning');
+    return;
+  }
+  document.getElementById('modalDescuento').style.display = 'flex';
+}
+
+function cerrarModalDescuento() {
+  document.getElementById('modalDescuento').style.display = 'none';
+  document.getElementById('pinError').style.display = 'none';
+  document.getElementById('pinGerente').value = '';
+}
+
+
+
+function autorizarDescuento() {
+  const pin = document.getElementById('pinGerente').value;
+  const descuento = parseFloat(document.getElementById('descuentoInput').value);
+
+  fetch('/validar-pin/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ pin })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log("Respuesta del backend:", data);  // <-- ⚠️ Agregado
+
+    if (data.success) {
+      descuentoAutorizado = descuento;
+      document.getElementById('discount').textContent = `$${descuento.toFixed(2)}`;
+      cerrarModalDescuento();
+      Swal.fire('✅ Autorizado', 'Descuento aplicado correctamente.', 'success');
+      calcularTotal();
+    } else {
+      document.getElementById('pinError').style.display = 'block';
+    }
+  })
+  .catch(err => {
+    console.error("Error de red:", err);
+    Swal.fire('❌ Error', 'No se pudo validar el PIN.', 'error');
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const efectivoInput = document.getElementById("efectivo");
+  if (efectivoInput) {
+    efectivoInput.addEventListener("input", calcularCambio);
+  }
+});
+
+function calcularCambio() {
+  const efectivo = parseFloat(document.getElementById("efectivo").value) || 0;
+  const totalTexto = document.getElementById("total").textContent.replace('$', '').trim();
+  const total = parseFloat(totalTexto) || 0;
+  const cambio = efectivo - total;
+
+  const cambioFormateado = cambio >= 0 ? `$${cambio.toFixed(2)}` : '$0.00';
+  document.getElementById("cambio").textContent = cambioFormateado;
+}

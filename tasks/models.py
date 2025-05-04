@@ -38,6 +38,7 @@ def crear_usuario_con_rol(sender, instance, created, **kwargs):
 class Usuario(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # Usa la tabla de Django
     rol = models.ForeignKey(Rol, on_delete=models.CASCADE)
+    pin_autorizacion = models.CharField(max_length=6, blank=True, null=True) 
 
     def __str__(self):
         return self.user.username
@@ -74,6 +75,7 @@ class Producto(models.Model):
         unique=True,
         validators=[codigo_barras_validator]
     )
+    alerta_stock_enviada = models.BooleanField(default=False)
     proveedor = models.ForeignKey('Proveedor', on_delete=models.CASCADE, null=True, blank=True)
     imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
 
@@ -112,6 +114,8 @@ class Venta(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2)
     usuario = models.ForeignKey(User, on_delete=models.CASCADE)
     metodo_pago = models.CharField(max_length=20)
+    descuento = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    autorizado_por = models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL, related_name='autorizaciones')  # 👤 gerente que autoriza
 
     def save(self, *args, **kwargs):
         if not self.folio:
@@ -158,3 +162,11 @@ class CorteCaja(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} - {self.fecha_inicio.strftime('%d/%m/%Y %H:%M')} → {self.fecha_fin.strftime('%H:%M')}"
+
+
+class PinGerente(models.Model):
+    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
+    pin = models.CharField(max_length=6)
+
+    def __str__(self):
+        return f"PIN de {self.usuario.user.username}"

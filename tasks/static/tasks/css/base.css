@@ -4,12 +4,25 @@ body {
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg, #F5F5DC, #D2B48C);
 }
+.navbar .container {
+    display: flex;
+    align-items: center;
+  }
+  
+  
+  .navbar {
+    background-color: #343a40;
+    padding: 10px 20px;
+    height: auto;
+    /* sin position fixed/sticky */
+  }
+  
 
-.navbar {
-    background-color: #343a40; /* Color oscuro */
-    border-radius: 8px 8px 0 0;
-    padding: 5px 0; /* Reduce el grosor de la barra */
-}
+  .container {
+    margin-top: 20px;  /* No más */
+  }
+  
+  
 
 .navbar-nav .nav-link {
     color: #fff;
@@ -42,9 +55,10 @@ body {
 }
 
 #logo-img {
-  width: 100px;  /* Ajusta el valor según el tamaño que desees */
-  height: auto;  /* Mantiene la relación de aspecto */
-}
+    width: 60px;
+    height: auto;
+    margin-right: 8px;
+  }
 
 
 

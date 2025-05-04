@@ -43,6 +43,8 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Inventario</a>
             <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="{% url 'dashboard_inventario' %}">Inventario</a></li>
+              <li><a class="dropdown-item" href="{% url 'dashboard_ventas' %}">ventas</a></li>
               <li><a class="dropdown-item" href="{% url 'create_product' %}">Crear Producto</a></li>
               <li><a class="dropdown-item" href="{% url 'lista_productos' %}">Lista Productos</a></li>
               <li><a class="dropdown-item" href="{% url 'crear_proveedor' %}">Nuevo Proveedor</a></li>
@@ -71,6 +73,7 @@
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Gestión</a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="{% url 'gerente_dashboard' %}">Panel Gerente</a></li>
+              
               <li><a class="dropdown-item" href="{% url 'dashboard_ventas' %}">Ventas</a></li>
               <li><a class="dropdown-item" href="{% url 'dashboard_inventario' %}">Inventario</a></li>
               <li><a class="dropdown-item" href="{% url 'create_product' %}">Crear Producto</a></li>

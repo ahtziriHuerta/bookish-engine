@@ -3,79 +3,92 @@
 {% block title %}Punto de Venta - Cajero{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-
 <link rel="stylesheet" href="{% static 'tasks/css/escaner.css' %}">
-<link rel="stylesheet" href="{% static 'tasks/css/cajero.css' %}">
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 <script src="{% static 'tasks/js/escaner.js' %}" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="{% static 'tasks/js/cajero.js' %}" defer></script>
 
-<!-- Contenido principal -->
 <div class="container">
-    <div class="products-panel">
-      <h2>Productos</h2>
-      <div class="grid" id="products">
-        {% for producto in productos %}
-        <div class="product {% if producto.stock == 0 %}sin-stock{% endif %}"
-             data-name="{{ producto.nombre }}" data-price="{{ producto.precio }}" data-stock="{{ producto.stock }}"
-             data-id="{{ producto.id }}">
-          {% if producto.imagen %}
-            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
-          {% else %}
-            <img src="{% static 'img/default.png' %}" alt="default">
-          {% endif %}
-          <p>{{ producto.nombre }}</p>
-          <span>${{ producto.precio }}</span>
-          <p class="stock-info {% if producto.stock == 0 %}agotado{% endif %}">
-            {% if producto.stock == 0 %}Agotado{% else %}Disponibles: {{ producto.stock }}{% endif %}
-          </p>
-        </div>
-        {% endfor %}
+  <div class="products-panel">
+    <h2>Productos</h2>
+    <div class="productos-container" id="products">
+      {% for producto in productos %}
+      <div class="product {% if producto.stock == 0 %}sin-stock{% endif %}"
+           data-name="{{ producto.nombre }}" data-price="{{ producto.precio }}" data-stock="{{ producto.stock }}"
+           data-id="{{ producto.id }}">
+        {% if producto.imagen %}
+          <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+        {% else %}
+          <img src="{% static 'img/default.png' %}" alt="default">
+        {% endif %}
+        <p>{{ producto.nombre }}</p>
+        <span>${{ producto.precio }}</span>
+        <p class="stock-info {% if producto.stock == 0 %}agotado{% endif %}">
+          {% if producto.stock == 0 %}Agotado{% else %}Disponibles: {{ producto.stock }}{% endif %}
+        </p>
       </div>
-      <input type="text" id="codigoManual" placeholder="Código de barras">
-      <button onclick="buscarProductoManual()" class="btn">Buscar producto</button>
-      <button onclick="abrirEscaner()" class="btn">Escanear código</button>
+      {% endfor %}
     </div>
-
-    <div class="ticket-panel">
-      <h2>Ticket</h2>
-      <ul id="ticket-list"></ul>
-      <div class="summary">
-        <p>Descuento: <span id="discount">$0.00</span></p>
-        <p>Iva: <span id="tax">$0.00</span></p>
-        <p class="total">Total: <span id="total">$0.00</span></p>
-        <div style="margin-top: 20px;">
-          <label>Efectivo recibido:</label><br>
-          <input type="text" id="efectivo" placeholder="$0.00" inputmode="decimal" pattern="[0-9]*" onclick="toggleNumpad()" oninput="calcularCambio()">
-          <p>Cambio: <span id="cambio">$0.00</span></p>
-          <div style="margin-top: 15px;">
-            <label for="metodo-pago">Método de pago:</label><br>
-            <select id="metodo-pago">
-              <option value="efectivo">Efectivo</option>
-              <option value="tarjeta">Tarjeta</option>
-              <option value="transferencia">Transferencia</option>
-              <option value="vales">Vales</option>
-            </select>
-          </div>
-        </div>
-        <button onclick="vistaPreviaTicket()" class="btn">Terminar</button>
-      </div>
-    </div>
+    <input type="text" id="codigoManual" placeholder="Código de barras">
+    <button type="button" onclick="buscarProductoManual()" class="btn">Buscar producto</button>
+    <button type="button" onclick="abrirEscaner()" class="btn">Escanear código</button>
   </div>
 
-  <!-- Modal para escáner -->
-  <div id="modalEscaner">
-    <div id="modalContent">
-      <h3>Escanea un producto</h3>
-      <div id="scanner-container"></div>
-      <button onclick="cerrarEscaner()" class="btn">Cerrar</button>
+  <div class="ticket-panel">
+    <h2>Ticket</h2>
+    <ul id="ticket-list"></ul>
+    <div class="summary" id="form-ticket">
+
+      <div class="form-group mt-3">
+        <label for="descuentoInput">Descuento solicitado:</label>
+        <input type="number" id="descuentoInput" min="0" step="0.01" class="form-control" placeholder="$0.00">
+        <button type="button" class="btn btn-warning mt-2" onclick="abrirModalDescuento()">Autorizar descuento</button>
+      </div>
+
+      <p>Descuento aplicado: <span id="discount">$0.00</span></p>
+      <p class="total">Total: <span id="total">$0.00</span></p>
+
+      <div class="form-group mt-3">
+        <label for="efectivo">Efectivo recibido:</label>
+        <input type="number" id="efectivo" class="form-control" placeholder="$0.00">
+      </div>
+
+      <p>Cambio: <span id="cambio">$0.00</span></p>
+
+      <div style="margin-top: 15px;">
+        <label for="metodo-pago">Método de pago:</label><br>
+        <select id="metodo-pago" class="form-control">
+          <option value="efectivo">Efectivo</option>
+          <option value="tarjeta">Tarjeta</option>
+          <option value="transferencia">Transferencia</option>
+          <option value="vales">Vales</option>
+        </select>
+      </div>
+
+      <button type="button" onclick="vistaPreviaTicket()" class="btn mt-3">Terminar</button>
     </div>
   </div>
+</div>
 
- 
+<!-- Modal de autorización -->
+<div id="modalDescuento" class="modal" style="display: none; position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
+  <div class="modal-content" style="background: white; padding: 20px; border-radius: 10px; max-width: 300px; margin: auto;">
+    <h5>Autorización de Descuento</h5>
+    <label for="pinGerente">PIN del Gerente:</label>
+    <input type="password" id="pinGerente" maxlength="6" class="form-control mb-3" />
+    <div id="pinError" class="text-danger" style="display: none;">PIN incorrecto</div>
+    <button type="button" class="btn btn-success" onclick="autorizarDescuento()">Autorizar</button>
+    <button type="button" class="btn btn-secondary" onclick="cerrarModalDescuento()">Cancelar</button>
+  </div>
+</div>
 
-  
+<!-- Modal escáner -->
+<div id="modalEscaner" style="display: none;">
+  <div id="modalContent">
+    <h3>Escanea un producto</h3>
+    <div id="scanner-container"></div>
+    <button type="button" onclick="cerrarEscaner()" class="btn">Cerrar</button>
+  </div>
+</div>
 {% endblock %}
