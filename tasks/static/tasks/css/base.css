@@ -1,41 +1,50 @@
-/* Estilo general del cuerpo */
+
+
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f8f9fa;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #F5F5DC, #D2B48C);
 }
 
-/* Estilo del contenedor principal */
-.container {
-  max-width: 900px;
-  margin: auto;
-}
-
-/* Estilo para las tarjetas */
-.card {
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Estilo para los mensajes de alerta */
-.alert {
-  font-weight: bold;
-}
-
-/* Estilo para la tabla */
-.table {
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-/* Botones personalizados */
-.btn {
-  font-size: 16px;
-}
-/* base.css */
 .navbar {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: #343a40; /* Color oscuro */
+    border-radius: 8px 8px 0 0;
+    padding: 5px 0; /* Reduce el grosor de la barra */
 }
+
+.navbar-nav .nav-link {
+    color: #fff;
+    font-size: 12pt;
+    text-align: center;
+    margin-left: 12px; /* Añade espacio entre los enlaces */
+    margin-right: 12px; /* Añade espacio entre los enlaces */
+}
+
+.navbar-nav .nav-link:hover {
+    color: #fff;
+    background-color: #555; /* Color de fondo más acorde con el color oscuro */
+    border-radius: 5px;
+}
+
 .navbar-brand {
-  font-size: 1.8rem;
-  font-weight: bold;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    padding-left: 0; /* Alinea el nombre a la orilla */
+    margin-right: 20px; /* Espacio a la derecha para no estar pegado al borde */
 }
+
+.navbar-toggler-icon {
+    background-color: #fff;
+}
+
+.text-danger {
+    color: #d32f2f !important;
+}
+
+#logo-img {
+  width: 100px;  /* Ajusta el valor según el tamaño que desees */
+  height: auto;  /* Mantiene la relación de aspecto */
+}
+
+
+

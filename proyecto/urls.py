@@ -35,11 +35,18 @@ urlpatterns = [
 
     # Gestión de Productos
     path('inventario/crear-producto/', views.crear_producto, name='crear_producto'),
+    path('inventario/create_product/', views.crear_producto, name='crear_producto'),
     path('buscar_producto/<str:codigo>/', views.buscar_producto, name='buscar_producto'),
+    path('api/producto/<str:codigo>/', views.buscar_producto, name='buscar_producto'),
     path('escanear/', views.escanear_view, name='escanear_producto'),
     path('inventario/actualizar_stock/<int:producto_id>/', views.actualizar_stock, name='actualizar_stock'),
     path('dashboard/inventario/create_product/', views.crear_producto, name='create_product'),
     path('dashboard/inventario/', views.dashboard_inventario, name='dashboard_inventario'),
+    path('inventario/producto/<int:producto_id>/', views.ver_producto, name='ver_producto'),
+    path('producto/<int:producto_id>/', views.ver_producto, name='ver_producto'),
+    path('buscar-producto/<str:codigo>/', buscar_producto, name='buscar_producto'),
+    path('productos/', views.lista_productos, name='lista_productos'),
+    path('producto/editar/<int:producto_id>/', views.editar_producto, name='editar_producto'),
 
     # Gestión de Proveedores
     path('dashboard/inventario/proveedor/nuevo/', views.crear_proveedor, name='crear_proveedor'),
@@ -54,30 +61,11 @@ urlpatterns = [
     path('dashboard/ventas/pdf/', views.exportar_ventas_pdf, name='exportar_ventas_pdf'),
     path('registrar_venta/', views.registrar_venta, name='registrar_venta'),
     path('dashboard/inventario/', views.dashboard_inventario, name='dashboard_inventario'),
-
-    
-  
+    path('ventas/eliminar/<str:folio>/', views.eliminar_venta, name='eliminar_venta'),
+    path('corte-caja/', views.corte_caja, name='corte_caja'),
     path('ver_ticket/<str:folio>/', views.ver_ticket, name='ver_ticket'),
     path('historial_ventas/', views.historial_ventas, name='historial_ventas'),
    
-   
-    path('ventas/eliminar/<str:folio>/', views.eliminar_venta, name='eliminar_venta'),
-    path('corte-caja/', views.corte_caja, name='corte_caja'),
-
-    path('inventario/create_product/', views.crear_producto, name='crear_producto'),
-    path('inventario/producto/<int:producto_id>/', views.ver_producto, name='ver_producto'),
-    path('producto/<int:producto_id>/', views.ver_producto, name='ver_producto'),
-    path('api/producto/<str:codigo>/', views.buscar_producto, name='buscar_producto'),
-
-    path('buscar-producto/<str:codigo>/', buscar_producto, name='buscar_producto'),
-    path('productos/', views.lista_productos, name='lista_productos'),
-    path('producto/editar/<int:producto_id>/', views.editar_producto, name='editar_producto'),
-
-   
-
-
-
-
 
     # Gestión de Tareas
     path('tasks/', views.tasks, name='tasks'),

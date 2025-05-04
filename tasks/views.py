@@ -8,7 +8,7 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.messages import get_messages
 from django.template.loader import get_template
-
+from .decorators import roles_permitidos  
 
 # Decoradores personalizados
 from .decorators import roles_permitidos
@@ -20,6 +20,7 @@ from .models import (
     Producto, IngresoProducto, EgresoProducto,
     Venta, DetalleVenta, CorteCaja
 )
+from .models import Proveedor
 
 # Formularios
 from .forms import TaskForm, UsuarioForm, ProductoForm
@@ -43,13 +44,16 @@ from django.db.models.functions import TruncDate
 from calendar import monthrange
 from datetime import datetime, date, time, timedelta
 
+from django.shortcuts import render, redirect
+from .forms import ProveedorForm
 
-### 🔹 VISTA DE INICIO
+
+
 def home(request):
     return render(request, 'home.html')
 
 
-### 🔹 AUTENTICACIÓN Y LOGIN
+
 
 def login_view(request):
     # Limpiar mensajes anteriores si los hay
@@ -90,14 +94,14 @@ def logout_view(request):
 
 
 
-### 🔹 DASHBOARD PARA ADMINISTRADOR
+
 @superuser_required
 def admin_dashboard(request):
     usuarios = Usuario.objects.all()
     roles = Rol.objects.all()
     return render(request, 'admin_dashboard.html', {'usuarios': usuarios, 'roles': roles})
 
-from .decorators import roles_permitidos  # Asegúrate de tener esta línea
+
 
 
 @roles_permitidos(["Cajero", 'Administrador', 'Gerente'])
@@ -232,7 +236,8 @@ def edit_user(request, user_id):
     return render(request, 'edit_user.html', {'usuario': usuario, 'roles': roles})
 
 
-### 🔹 AGREGAR ROLES DESDE EL PANEL DE ADMINISTRACIÓN
+
+@roles_permitidos(['Administrador', 'Gerente'])  
 @superuser_required
 def add_role(request):
     if request.method == 'POST':
@@ -247,7 +252,7 @@ def add_role(request):
     return render(request, 'admin_dashboard.html')
 
 
-### 🔹 ELIMINAR USUARIO
+
 @roles_permitidos(['Administrador','Gerente'])
 @superuser_required
 def delete_user(request, user_id):
@@ -350,9 +355,9 @@ def exportar_ventas_pdf(request):
     return generar_pdf_ventas()
 
 
-from django.shortcuts import render, redirect
-from .forms import ProveedorForm
 
+
+@roles_permitidos(['Administrador', 'Gerente','Ventas'])  
 def crear_proveedor(request):
     if request.method == 'POST':
         form = ProveedorForm(request.POST)
@@ -365,9 +370,10 @@ def crear_proveedor(request):
     return render(request, 'crear_proveedor.html', {'form': form})
 
 
-# views.py
-from .models import Proveedor
 
+
+
+@roles_permitidos(['Administrador', 'Gerente', 'Ventas'])  
 def lista_proveedores(request):
     proveedores = Proveedor.objects.all()
     return render(request, 'lista_proveedores.html', {'proveedores': proveedores})
@@ -425,7 +431,6 @@ def registrar_venta(request):
             total_calculado = 0
             detalles_a_guardar = []
 
-            # 🔎 Validar stock antes de crear la venta
             for item in items:
                 producto = Producto.objects.get(id=item['id'])
                 cantidad = int(item['qty'])
@@ -436,14 +441,13 @@ def registrar_venta(request):
                         'error': f"Stock insuficiente para '{producto.nombre}'. Disponible: {producto.stock}, solicitado: {cantidad}"
                     }, status=400)
 
-            # ✅ Crear la venta con total temporal
+           
             venta = Venta.objects.create(
                 usuario=request.user,
                 total=0,
                 metodo_pago=metodo_pago
             )
 
-            # 🧾 Crear los detalles y descontar stock
             for item in items:
                 producto = Producto.objects.get(id=item['id'])
                 cantidad = int(item['qty'])
@@ -459,14 +463,12 @@ def registrar_venta(request):
                     precio_unitario=precio
                 )
 
-                # Descontar stock
                 producto.stock -= cantidad
                 producto.save()
 
                 print(f"✅ Agregado: {producto.nombre} x{cantidad} - ${precio}")
                 print(f"📦 Nuevo stock de {producto.nombre}: {producto.stock}")
 
-            # Guardar el total final
             venta.total = total_calculado
             venta.save()
             venta.refresh_from_db()
@@ -649,7 +651,7 @@ def corte_caja(request):
             messages.success(request, "Corte enviado al gerente.")
         return redirect('corte_caja')
 
-    # ✅ Acción al hacer POST (guardar + enviar + renderizar para imprimir)
+  
     if request.method == 'POST':
         # 1. Guardar el corte
         CorteCaja.objects.create(
@@ -674,7 +676,6 @@ def corte_caja(request):
         })
         return HttpResponse(html_string)
 
-    # Vista por defecto (GET normal)
     return render(request, 'corte_caja.html', {
         'ventas_resumen': ventas_resumen,
         'total_ventas': total_ventas,
@@ -684,7 +685,7 @@ def corte_caja(request):
     })
 
             
-            
+@roles_permitidos(['Administrador', 'Gerente','cajero', 'Ventas'])         
 def generar_pdf(request, ventas, total, metodo, inicio, fin):
     html_string = render_to_string('corte_pdf.html', {
         'ventas_resumen': ventas,
@@ -697,6 +698,8 @@ def generar_pdf(request, ventas, total, metodo, inicio, fin):
     pdf_file = HTML(string=html_string, base_url=request.build_absolute_uri()).write_pdf()
     return HttpResponse(pdf_file, content_type='application/pdf')
 
+
+@roles_permitidos(['Administrador', 'Gerente','cajero', 'Ventas'])  
 def enviar_pdf(request, ventas, total, metodo, inicio, fin):
     html_string = render_to_string('corte_pdf.html', {
         'ventas_resumen': ventas,
@@ -733,8 +736,10 @@ def buscar_producto(request, codigo):
         return JsonResponse({'error': 'Producto no encontrado'}, status=404)
 
 
+@roles_permitidos(['Administrador', 'Cajero', 'Ventas', 'Gerente'])
 def escanear_view(request):
     return render(request, 'escaner.html')
+
 
 @roles_permitidos(['Administrador', 'Gerente'])  # si estás usando decoradores de roles
 def editar_producto(request, producto_id):
@@ -748,6 +753,9 @@ def editar_producto(request, producto_id):
         form = ProductoForm(instance=producto)
     return render(request, 'editar_producto.html', {'form': form, 'producto': producto})
 
+
+
+@roles_permitidos(['Administrador', 'Cajero', 'Ventas', 'Gerente'])
 def lista_productos(request):
     productos = Producto.objects.all()
     return render(request, 'lista_productos.html', {'productos': productos})

@@ -3,7 +3,7 @@
 
 {% block content %}
 <div style="max-width: 1200px; margin: 40px auto; padding: 0 20px; font-family: 'Poppins', sans-serif;">
-  <h2 style="color: #343a40; text-align: center; font-size: 32px; margin-bottom: 40px;">Panel de Administración 🧩</h2>
+  <h2 style="color: #343a40; text-align: center; font-size: 32px; margin-bottom: 40px;">Roles asignados </h2>
   {% if messages %}
     <div style="background-color: #fff8e1; border-left: 6px solid #ff6f00; padding: 16px 20px; border-radius: 12px; margin-bottom: 30px;">
       {% for message in messages %}
@@ -12,28 +12,14 @@
     </div>
   {% endif %}
 
-  <div style="display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 40px;">
-    <!-- Gestionar Roles -->
-    <div style="flex: 1 1 45%; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
-      <h4 style="color: #ff6f00; margin-bottom: 20px;">🛠 Crear Nuevo Rol</h4>
-      <form method="POST" style="display: flex; flex-direction: column; gap: 12px;">
-        {% csrf_token %}
-        <input type="text" name="nombre_rol" placeholder="Nombre del Rol" required style="padding: 12px; border: 1px solid #ccc; border-radius: 10px;">
-        <button type="submit" style="background-color: #ff6f00; color: white; padding: 12px; border: none; border-radius: 10px;">Agregar Rol</button>
-      </form>
-    </div>
+  
 
-    <!-- Crear Usuario -->
-    <div style="flex: 1 1 45%; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
-      <h4 style="color: #ff6f00; margin-bottom: 20px;">👥 Crear Usuario</h4>
-      <p style="margin-bottom: 20px;">Accede rápidamente a la creación de usuarios desde aquí.</p>
-      <a href="{% url 'create_user' %}" style="background-color: #43a047; text-align: center; color: white; padding: 12px; text-decoration: none; border-radius: 10px;">➕ Crear Usuario</a>
-    </div>
-  </div>
+ 
 
   <!-- Tabla de Usuarios -->
-  <div style="background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
-    <h4 style="color: #ff6f00; margin-bottom: 20px;">📋 Lista de Usuarios Registrados</h4>
+  <div style="width: 80%; margin: auto; background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.05);">
+ 
+    <h4 style="color: #ff6f00; margin-bottom: 20px;">📋 Roles asignados</h4>
     <div style="overflow-x: auto;">
       <table style="width: 100%; border-collapse: collapse;">
         <thead style="background-color: #ffe0b2;">
