@@ -1,0 +1,32 @@
+
+    @page { margin: 1.5cm; }
+    body { font-family: Arial, sans-serif; }
+    h1, h2 { text-align: center; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      table-layout: fixed;
+      word-wrap: break-word;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    .logo-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 10px;
+    }
+    .logo-header img {
+      height: 70px;
+      max-width: 150px;
+      object-fit: contain;
+    }
+  
