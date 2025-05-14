@@ -1,8 +1,8 @@
 services:
   - type: web
     name: punto-de-venta
-    runtime: python
-    buildCommand: |
+    env: python
+    buildCommand: 
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
     startCommand: gunicorn proyecto.wsgi:application
@@ -10,7 +10,11 @@ services:
       - key: DJANGO_SETTINGS_MODULE
         value: proyecto.settings
       - key: SECRET_KEY
-        generateValue: true
+        value: tu-clave-super-secreta
       - key: DEBUG
         value: "False"
+      - key: EMAIL_HOST_USER
+        value: tiendacorozo@gmail.com
+      - key: EMAIL_HOST_PASSWORD
+        value: wkti yeec iumn xuxh
     plan: free
