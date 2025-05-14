@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: punto-de-venta
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn proyecto.proyecto.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: proyecto.proyecto.settings
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+    plan: free
