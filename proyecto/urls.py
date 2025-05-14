@@ -73,7 +73,7 @@ urlpatterns = [
     path('tasks/', views.tasks, name='tasks'),
     path('tasks/create/', views.create_task, name='create_task'),
     
-
+    path('tasks/create/', views.create_task, name='create_task'),
     # Página de Inicio
     path('', views.home, name='home'),
 
