@@ -7,8 +7,8 @@ services:
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: proyecto.proyecto.settings
-      - key: DEBUG
-        value: "False"
       - key: SECRET_KEY
         generateValue: true
+      - key: DEBUG
+        value: "False"
     plan: free
