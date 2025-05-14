@@ -1,0 +1,26 @@
+.card {
+    background-color: #fff;
+    border-radius: 15px;
+}
+.btn {
+    min-width: 120px;
+}
+
+
+
+.table-hover tbody tr:hover {
+    background-color: #f0f0f0;
+}
+
+.btn-sm {
+    min-width: 80px;
+}
+
+.confirmar-eliminar {
+    transition: background-color 0.3s;
+}
+
+.confirmar-eliminar:hover {
+    background-color: #c82333 !important;
+    color: white;
+}
