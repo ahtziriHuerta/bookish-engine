@@ -56,6 +56,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'tasks.context_processors.rol_usuario',
                 'django.contrib.messages.context_processors.messages',
+                'django.middleware.security.SecurityMiddleware',
+                'whitenoise.middleware.WhiteNoiseMiddleware', 
             ],
         },
     },
@@ -91,6 +93,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [
     BASE_DIR / 'tasks' / 'static',
 ]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 MEDIA_URL = '/media/'
