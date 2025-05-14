@@ -17,8 +17,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'tasks',
 ]
+CSRF_TRUSTED_ORIGINS = [
+    "https://web-production-d0db.up.railway.app",
+]
+
 
 LOGIN_URL = '/login/'
 
